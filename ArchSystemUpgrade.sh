@@ -77,31 +77,39 @@ clean_symlinks() {
 
 notify_actions() {
 	# Notify of anything worth mentioning
-	echo "Alerts:";
-	echo "$1";
+	if [ -n "${1/[ ]*\n/}" ];
+	then
+		echo "Alerts: $1"
+	fi
 	
-	echo "Pacfiles:";
-	echo "$2";
+	if [ -n "${2/[ ]*\n/}" ];
+	then
+		echo "Pacfiles: $2"
+	fi
 	
-	echo "Orphaned:";
-	echo "$3";
+	if [ -n "${3/[ ]*\n/}" ];
+	then
+		echo "Orphaned: $3"
+	fi
 	
-	echo "Dropped:";
-	echo "$4";
+	if [ -n "${4/[ ]*\n/}" ];
+	then
+		echo "Dropped: $4"
+	fi
 }
 
 system_upgrade() {
 	echo "Getting an up-to-date mirrorlist:"
-	update_mirrorlist
+	#update_mirrorlist
 
 	echo "Upgrading the system:"
-	upgrade_system
+	#upgrade_system
 
 	echo "Pay attention to alerts while upgrading the system:"
 	local ALERT_ACTION=$(upgrade_alerts)
 
 	echo "Rebuilding AUR packages:"
-	rebuild_aur
+	#rebuild_aur
 
 	echo "Finding pacnew / pacsave files:"
 	local PACFILES=$(find_pacfiles)
