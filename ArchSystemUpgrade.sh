@@ -2,7 +2,9 @@
 
 update_mirrorlist() {
 	# Commands for getting an up-to-date mirrorlist
-	curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | sudo tee /etc/pacman.d/mirrorlist.backup
+	curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on" \
+	| sed -e 's/^#Server/Server/' -e '/^#/d' \
+	| sudo tee /etc/pacman.d/mirrorlist.backup
 	rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup | sudo tee /etc/pacman.d/mirrorlist
 }
 
