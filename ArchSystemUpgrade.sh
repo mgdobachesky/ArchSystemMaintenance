@@ -68,7 +68,8 @@ clean_cache() {
 
 clean_config() {
 	# Clean up old configuration files
-	echo "Check ~/.config/, ~/.cache/, and ~/.local/share for old configuration files"
+	echo "Check ~/, ~/.config/, ~/.cache/, and ~/.local/share for old configuration files"
+	# ~/
 	# ~/.config/
 	# ~/.cache/
 	# ~/.local/share
