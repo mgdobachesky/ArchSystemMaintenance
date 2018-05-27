@@ -23,6 +23,8 @@ upgrade_alerts() {
 		ALERT_ACTION="";
 	fi
 	echo $ALERT_ACTION
+
+	# TODO: Use '/var/log/pacman.log' to automatically pick up any alerts for the user
 }
 
 rebuild_aur() {
