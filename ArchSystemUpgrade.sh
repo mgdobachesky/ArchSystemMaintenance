@@ -99,50 +99,48 @@ notify_actions() {
 }
 
 system_upgrade() {
-	echo "Getting an up-to-date mirrorlist:"
-	#update_mirrorlist
-
-	echo "Upgrading the system:"
-	#upgrade_system
-
-	echo "Pay attention to alerts while upgrading the system:"
+	# Upgrade the System
+	update_mirrorlist
+	upgrade_system
 	local ALERT_ACTION=$(upgrade_alerts)
-
-	echo "Rebuilding AUR packages:"
-	#rebuild_aur
-
-	echo "Finding pacnew / pacsave files:"
+	rebuild_aur
 	local PACFILES=$(find_pacfiles)
-
-	echo "Checking for orphaned packages:"
 	local ORPHANS=$(check_orphans)
-
-	echo "Removing unused orphan packages:"
 	remove_orphans
-
-	echo "Checking for dropped packages:"
 	local DROPPED=$(check_dropped)
-
-	echo "Removing all packages from cache that are not installed:"
-	clean_cache
-
-	echo "Cleaning up old configuration files:"
-	clean_config
-
-	echo "Removing broken symlinks:"
-	clean_symlinks
-
-	echo "Notify user of any alerts:"
 	notify_actions "$ALERT_ACTION" "$PACFILES" "$ORPHANED" "$DROPPED"
-
 }
 
-# Read arch linux website for potential problems
-echo "Read the Arch Linux website for potential problems before continuing:"
-read -r -p "Ready? [y/N] " response
-if [[ "$response" == "y" ]];
-then
-	system_upgrade
-else
-	echo "Come back after reading the website for potential problems";
-fi
+system_clean() {
+	# Clean the filesystem
+	clean_cache
+	clean_config
+	clean_symlinks
+}
+
+menu_options() {
+	# Display menu options
+	clear
+	echo "WARNING: Read the Arch Linux home page for updates that require out-of-the-ordinary user intervention"
+	echo "1) Upgrade the System"
+	echo "2) Clean the Filesystem"
+	echo "0) Exit"
+}
+
+# Take appropriate action
+while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ];
+do
+	case "$response" in
+		"1")
+			system_upgrade
+			;;
+		"2")
+			system_clean
+			;;
+		*)
+			echo "Please choose an existing option"
+			;;
+	esac
+
+	read -r -p 'Press any key to continue...'	
+done
