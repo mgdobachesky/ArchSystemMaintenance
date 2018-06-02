@@ -28,12 +28,20 @@ upgrade_alerts() {
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	for D in $HOME/.aur/*/; do 
-		cd "${D}";
-		git pull origin master;
-		makepkg -sirc --noconfirm "${D}";
-		cd $HOME;
-	done
+	ORIGIN_DIR="$(pwd)"
+	while IFS= read -r -d $'\0'; do
+		cd $REPLY
+		for D in $REPLY/*/; do 
+			if [ -d "$D" ]; 
+			then
+				cd "${D}"
+				git pull origin master
+				makepkg -sirc --noconfirm
+			fi
+
+		done
+	done < <(sudo find /home -name ".aur" -print0)
+	cd $ORIGIN_DIR
 }
 
 find_pacfiles() {
@@ -104,15 +112,15 @@ notify_actions() {
 
 system_upgrade() {
 	# Upgrade the System
-	update_mirrorlist
-	upgrade_system
-	local ALERT_ACTION=$(upgrade_alerts)
+	#update_mirrorlist
+	#upgrade_system
+	#local ALERT_ACTION=$(upgrade_alerts)
 	rebuild_aur
-	local PACFILES=$(find_pacfiles)
-	local ORPHANS=$(check_orphans)
-	remove_orphans
-	local DROPPED=$(check_dropped)
-	notify_actions "$ALERT_ACTION" "$PACFILES" "$ORPHANED" "$DROPPED"
+	#local PACFILES=$(find_pacfiles)
+	#local ORPHANS=$(check_orphans)
+	#remove_orphans
+	#local DROPPED=$(check_dropped)
+	#notify_actions "$ALERT_ACTION" "$PACFILES" "$ORPHANED" "$DROPPED"
 }
 
 system_clean() {
