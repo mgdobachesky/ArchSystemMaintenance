@@ -9,21 +9,7 @@ update_mirrorlist() {
 
 upgrade_system() {
 	# Upgrade the system
-	sudo pacman -Syu
-}
-
-upgrade_alerts() {
-	# Pay attention to alerts while upgrading the system
-	read -r -p "Were there any alerts? [y/N]" alerts
-	if [[ "$alerts" == "y" ]];
-	then
-		ALERT_ACTION="There were alerts during the upgrade that require user intervention.";
-	else
-		ALERT_ACTION="";
-	fi
-	echo $ALERT_ACTION
-
-	# TODO: Use '/var/log/pacman.log' to automatically pick up any alerts for the user
+	sudo pacman -Syu --noconfirm
 }
 
 rebuild_aur() {
@@ -44,96 +30,93 @@ rebuild_aur() {
 	cd $ORIGIN_DIR
 }
 
-find_pacfiles() {
-	# Find and act on any .pacnew or .pacsave files
-	sudo updatedb
-	PACFILES="$(locate --existing --regex "\.pac(new|save)$")";
-	echo $PACFILES
-}
-
 check_orphans() {
-	# Check for orphaned packages
-	ORPHANED="$(pacman -Qtd)";
+	# Check if any orphaned packages exist
+	ORPHANED="$(pacman -Qtd)"
 	echo $ORPHANED
 }
 
 remove_orphans() {
 	# Remove unused orphan packages
-	sudo pacman -Rns $(pacman -Qtdq)
+	local ORPHANED=$(check_orphans)
+	if [ -n "${ORPHANED/[ ]*\n/}" ];
+	then
+		sudo pacman -Rns $(pacman -Qtdq)
+	fi
+}
+
+upgrade_alerts() {
+	# Pay attention to alerts while upgrading the system
+	echo "NOTICE: Check /var/log/pacman.log for alerts that might of come up while upgrading the system."
+
+	# TODO: Use '/var/log/pacman.log' to automatically pick up any alerts for the user
+}
+
+find_pacfiles() {
+	# Find and act on any .pacnew or .pacsave files
+	sudo updatedb
+	PACFILES="$(locate --existing --regex "\.pac(new|save)$")"
+	if [ -n "${PACFILES/[ ]*\n/}" ];
+	then
+		echo "PACFILES: $PACFILES"
+	fi
 }
 
 check_dropped() {
 	# Check for dropped packages (NOTE: AUR packages are included in output)
-	DROPPED="$(pacman -Qm)";
-	echo $DROPPED
-}
-
-clean_cache() {
-	# Remove all packages from cache that are not currently installed
-	sudo pacman -Sc
-}
-
-clean_config() {
-	# Clean up old configuration files
-	echo "Check ~/, ~/.config/, ~/.cache/, and ~/.local/share for old configuration files"
-	# ~/
-	# ~/.config/
-	# ~/.cache/
-	# ~/.local/share
-}
-
-clean_symlinks() {
-	# Remove broken symlinks
-	sudo find -xtype l -print | xargs rm
+	DROPPED="$(pacman -Qm)"
+	if [ -n "${DROPPED/[ ]*\n/}" ];
+	then
+		echo "DROPPED: $DROPPED"
+	fi
 }
 
 notify_actions() {
 	# Notify of anything worth mentioning
-	if [ -n "${1/[ ]*\n/}" ];
-	then
-		echo "Alerts: $1"
-	fi
-	
-	if [ -n "${2/[ ]*\n/}" ];
-	then
-		echo "Pacfiles: $2"
-	fi
-	
-	if [ -n "${3/[ ]*\n/}" ];
-	then
-		echo "Orphaned: $3"
-	fi
-	
-	if [ -n "${4/[ ]*\n/}" ];
-	then
-		echo "Dropped: $4"
-	fi
+	upgrade_alerts
+	find_pacfiles
+	check_dropped
+}
+
+clean_cache() {
+	# Remove all packages from cache that are not currently installed
+	sudo pacman -Sc --noconfirm
+}
+
+clean_symlinks() {
+	# Remove broken symlinks
+	while IFS= read -r -d $'\0'; do 
+		sudo rm $REPLY
+	done < <(sudo find / -path /proc -prune -o -path /run -prune -o -xtype l -print0)	
+}
+
+clean_config() {
+	# Clean up old configuration files
+	echo "NOTICE: Check ~/, ~/.config/, ~/.cache/, and ~/.local/share for old configuration files."
+
+	# TODO: Find a way to automate the cleaning of ~/, ~/.config/, ~/.cache/, and ~/.local/share
 }
 
 system_upgrade() {
 	# Upgrade the System
-	#update_mirrorlist
-	#upgrade_system
-	#local ALERT_ACTION=$(upgrade_alerts)
+	update_mirrorlist
+	upgrade_system
 	rebuild_aur
-	#local PACFILES=$(find_pacfiles)
-	#local ORPHANS=$(check_orphans)
-	#remove_orphans
-	#local DROPPED=$(check_dropped)
-	#notify_actions "$ALERT_ACTION" "$PACFILES" "$ORPHANED" "$DROPPED"
+	remove_orphans
+	notify_actions
 }
 
 system_clean() {
 	# Clean the filesystem
 	clean_cache
-	clean_config
 	clean_symlinks
+	clean_config
 }
 
 menu_options() {
 	# Display menu options
 	clear
-	echo "WARNING: Read the Arch Linux home page for updates that require out-of-the-ordinary user intervention"
+	echo "WARNING: Read the Arch Linux home page for updates that require out-of-the-ordinary user intervention."
 	echo "1) Upgrade the System"
 	echo "2) Clean the Filesystem"
 	echo "0) Exit"
