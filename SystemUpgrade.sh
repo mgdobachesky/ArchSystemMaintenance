@@ -69,6 +69,8 @@ check_dropped() {
 	then
 		echo "DROPPED: $DROPPED"
 	fi
+
+	# TODO: Don't display AUR packages in the dropped list
 }
 
 notify_actions() {
