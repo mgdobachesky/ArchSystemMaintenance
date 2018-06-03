@@ -1,10 +1,15 @@
 #!/bin/bash
 
+fetch_warnings() {
+	# TODO: Get live feed with the last posted Arch Linux Home site warning(s)
+	# TODO: Maybe save when the last update was and then only show the latest warning
+}
+
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	sudo reflector --country 'United States' --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 
-	# TODO: If reflector is not installed
+	# TODO: If reflector is not installed (which reflector)
 	#curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on" \
 	#| sed -e 's/^#Server/Server/' -e '/^#/d' \
 	#| sudo tee /etc/pacman.d/mirrorlist
@@ -55,6 +60,7 @@ upgrade_alerts() {
 	echo "NOTICE: Check /var/log/pacman.log for alerts that might of come up while upgrading the system."
 
 	# TODO: Use '/var/log/pacman.log' to automatically pick up any alerts for the user
+	# TODO: Maybe save last update and retrieve all pacman warnings since then
 }
 
 find_pacfiles() {
@@ -107,6 +113,7 @@ clean_config() {
 
 system_upgrade() {
 	# Upgrade the System
+	# TODO: fetch_warnings
 	update_mirrorlist
 	upgrade_system
 	rebuild_aur
@@ -131,6 +138,8 @@ menu_options() {
 	# TODO: 3) System security scanning options?
 	echo "0) Exit"
 }
+
+# TODO: Load and save user settings / preferences?
 
 # Take appropriate action
 while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ];
