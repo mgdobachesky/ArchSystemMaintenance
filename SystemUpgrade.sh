@@ -1,10 +1,8 @@
 #!/bin/bash
 
 update_mirrorlist() {
-	# Commands for getting an up-to-date mirrorlist
-	curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on" \
-	| sed -e 's/^#Server/Server/' -e '/^#/d' \
-	| sudo tee /etc/pacman.d/mirrorlist
+	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
+	sudo reflector --country 'United States' --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 }
 
 upgrade_system() {
