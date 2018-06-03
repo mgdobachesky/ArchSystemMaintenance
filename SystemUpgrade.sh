@@ -4,6 +4,13 @@ fetch_warnings() {
 	# TODO: Get live feed with the last posted Arch Linux Home site warning(s)
 	# TODO: Maybe save when the last update was and then only show the latest warning
 	echo "TODO"
+	ARCH_NEWS="$(curl https://www.archlinux.org/feeds/news/)"
+	
+	while read -r; do
+		echo $REPLY
+		echo ""
+		echo "!!!!!!!!"
+	done < <(grep -ozP '(?s)(?<=<item>).*?(?=</item>)' <<< "$ARCH_NEWS")
 }
 
 update_mirrorlist() {
@@ -114,12 +121,12 @@ clean_config() {
 
 system_upgrade() {
 	# Upgrade the System
-	# TODO: fetch_warnings
-	update_mirrorlist
-	upgrade_system
-	rebuild_aur
-	remove_orphans
-	notify_actions
+	fetch_warnings
+	#update_mirrorlist
+	#upgrade_system
+	#rebuild_aur
+	#remove_orphans
+	#notify_actions
 }
 
 system_clean() {
