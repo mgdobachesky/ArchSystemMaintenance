@@ -128,6 +128,7 @@ menu_options() {
 	echo "WARNING: Read the Arch Linux home page for updates that require out-of-the-ordinary user intervention."
 	echo "1) Upgrade the System"
 	echo "2) Clean the Filesystem"
+	# TODO: 3) System security scanning options?
 	echo "0) Exit"
 }
 
