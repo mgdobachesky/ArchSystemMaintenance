@@ -3,6 +3,13 @@
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	sudo reflector --country 'United States' --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+
+	# TODO: If reflector is not installed
+	#curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on" \
+	#| sed -e 's/^#Server/Server/' -e '/^#/d' \
+	#| sudo tee /etc/pacman.d/mirrorlist
+
+	# TODO: Maybe delete mirrorlist.pacnew if it exists?
 }
 
 upgrade_system() {
@@ -95,6 +102,7 @@ clean_config() {
 	echo "NOTICE: Check ~/, ~/.config/, ~/.cache/, and ~/.local/share for old configuration files."
 
 	# TODO: Find a way to automate the cleaning of ~/, ~/.config/, ~/.cache/, and ~/.local/share
+	# TODO: rmshit-like script?
 }
 
 system_upgrade() {
@@ -111,6 +119,7 @@ system_clean() {
 	clean_cache
 	clean_symlinks
 	clean_config
+	# TODO: rmlint if installed?
 }
 
 menu_options() {
