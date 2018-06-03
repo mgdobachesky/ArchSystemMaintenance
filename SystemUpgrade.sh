@@ -3,6 +3,7 @@
 fetch_warnings() {
 	# TODO: Get live feed with the last posted Arch Linux Home site warning(s)
 	# TODO: Maybe save when the last update was and then only show the latest warning
+	echo "TODO"
 }
 
 update_mirrorlist() {
