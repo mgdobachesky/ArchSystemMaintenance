@@ -3,24 +3,18 @@
 fetch_warnings() {
 	# TODO: Get live feed with the last posted Arch Linux Home site warning(s)
 	# TODO: Maybe save when the last update was and then only show the latest warning
-	echo "TODO"
 	ARCH_NEWS="$(curl https://www.archlinux.org/feeds/news/)"
-	
-	while read -r; do
-		echo $REPLY
-		echo ""
-		echo "!!!!!!!!"
-	done < <(grep -ozP '(?s)(?<=<item>).*?(?=</item>)' <<< "$ARCH_NEWS")
+
+	xml sel -t -m "/rss/channel/item" \
+	-o "Title: " -v "title"  -n \
+	-o "Date: " -v "pubDate" -n \
+	-o "Description: " -v "description" -n -n \
+	<<< "$ARCH_NEWS"
 }
 
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	sudo reflector --country 'United States' --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
-
-	# TODO: If reflector is not installed (which reflector)
-	#curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on" \
-	#| sed -e 's/^#Server/Server/' -e '/^#/d' \
-	#| sudo tee /etc/pacman.d/mirrorlist
 
 	# TODO: Maybe delete mirrorlist.pacnew if it exists?
 }
@@ -121,12 +115,12 @@ clean_config() {
 
 system_upgrade() {
 	# Upgrade the System
-	fetch_warnings
-	#update_mirrorlist
-	#upgrade_system
-	#rebuild_aur
-	#remove_orphans
-	#notify_actions
+	#fetch_warnings
+	update_mirrorlist
+	upgrade_system
+	rebuild_aur
+	remove_orphans
+	notify_actions
 }
 
 system_clean() {
