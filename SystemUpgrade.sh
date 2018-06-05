@@ -2,7 +2,9 @@
 
 fetch_warnings() {
 	# TODO: Get live feed with the last posted Arch Linux Home site warning(s)
-	# TODO: Maybe save when the last update was and then only show the latest warning
+	# TODO: Maybe save when the last update was and then only show the latest warnings
+
+	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
 	ARCH_NEWS="$(curl https://www.archlinux.org/feeds/news/)"
 
 	xml sel -t -m "/rss/channel/item" \
