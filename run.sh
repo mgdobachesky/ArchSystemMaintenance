@@ -54,18 +54,16 @@ rebuild_aur() {
 	cd $ORIGIN_DIR
 }
 
-check_orphans() {
-	# Check if any orphaned packages exist
-	ORPHANED="$(pacman -Qtd)"
-	echo $ORPHANED
-}
-
 remove_orphans() {
 	# Remove unused orphan packages
-	local ORPHANED=$(check_orphans)
+	ORPHANED="$(pacman -Qtd)"
 	if [ -n "${ORPHANED/[ ]*\n/}" ];
 	then
-		sudo pacman -Rns $(pacman -Qtdq)
+		echo "ORPHANED PACKAGES: $ORPHANED"
+		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
+		if [ $REPLY == "y" ]; then
+			sudo pacman -Rns $(pacman -Qtdq)
+		fi
 	fi
 }
 
@@ -96,6 +94,7 @@ check_dropped() {
 	fi
 
 	# TODO: Don't display AUR packages in the dropped list
+	# TODO: Delete dropped packages
 }
 
 notify_actions() {
@@ -112,9 +111,17 @@ clean_cache() {
 
 clean_symlinks() {
 	# Remove broken symlinks
-	while IFS= read -r -d $'\0'; do 
-		sudo rm $REPLY
-	done < <(sudo find / -path /proc -prune -o -path /run -prune -o -xtype l -print0)	
+	BROKEN_SYMLINKS="$(find -xtype l -print)"
+	if [ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ];
+	then
+		echo "BROKEN SYMLINKS: $BROKEN_SYMLINKS"
+		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
+		if [ $REPLY == "y" ]; then
+			while IFS= read -r -d $'\0'; do 
+				rm $REPLY
+			done < <(find -xtype l -print0)
+		fi
+	fi	
 }
 
 clean_config() {
