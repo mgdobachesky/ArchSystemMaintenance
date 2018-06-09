@@ -76,7 +76,7 @@ def rmjunk():
             print("    %s" % f)
 
     if len(found) == 0:
-        print("No junk files found :)")
+        print("No junk files found")
         return
 
     if yesno("Remove all?", default="n"):

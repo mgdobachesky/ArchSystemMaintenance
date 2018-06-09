@@ -134,7 +134,7 @@ remove_lint() {
 	# Run rmlint for further system cleaning
 	rmlint ~
 	sed -i "s/^handle_emptydir[^\(\)].*//" rmlint.sh
-	./rmlint.sh -xd
+	./rmlint.sh -x
 	rm rmlint.sh
 	rm rmlint.json
 
