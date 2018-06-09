@@ -127,16 +127,15 @@ clean_symlinks() {
 clean_config() {
 	# Clean up old configuration files
 	echo "NOTICE: Check ~/, ~/.config/, ~/.cache/, and ~/.local/share for old configuration files."
-
-	# TODO: Find a way to automate the cleaning of ~/, ~/.config/, ~/.cache/, and ~/.local/share
-	# TODO: rmshit-like script?
+	python ./Scripts/rmjunk.py 
 }
 
 remove_lint() {
 	# Run rmlint for further system cleaning
 	rmlint ~
 	sed -i "s/^handle_emptydir[^\(\)].*//" rmlint.sh
-	./rmlint.sh
+	./rmlint.sh -xd
+	rm rmlint.sh
 	rm rmlint.json
 }
 
