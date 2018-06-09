@@ -1,19 +1,20 @@
 #!/bin/bash
 
 fetch_warnings() {
-	# TODO: Get live feed with the last posted Arch Linux Home site warning(s)
-	# TODO: Maybe save when the last update was and then only show the latest warnings
-
 	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
-	ARCH_NEWS="$(curl https://www.archlinux.org/feeds/news/)"
 
-	UPDATES="$(xml sel -t -m "/rss/channel/item" \
-	-o "Title: " -v "title"  -n \
-	-o "Date: " -v "pubDate" -n \
-	-o "Description: " -v "description" -n -n \
-	<<< "$ARCH_NEWS")"
+	python ./Scripts/ArchNews.py $LAST_UPGRADE
+	ALERTS=$?
+	
+	if [ $ALERTS == 1 ]; then
+		echo "WARNING: This upgrade requires out-of-the-ordinary user intervention."
+		echo "Continue only after fully resolving the issue(s) above."
 
-	echo $(UPDATES[1])
+		read -r -p "Are you ready to continue? [y/N]"
+		if [ $REPLY != "y" ]; then
+			exit
+		fi
+	fi
 }
 
 update_mirrorlist() {
@@ -138,7 +139,6 @@ system_clean() {
 menu_options() {
 	# Display menu options
 	clear
-	echo "WARNING: Read the Arch Linux home page for updates that require out-of-the-ordinary user intervention."
 	echo "1) Upgrade the System"
 	echo "2) Clean the Filesystem"
 	# TODO: 3) System security scanning options?
