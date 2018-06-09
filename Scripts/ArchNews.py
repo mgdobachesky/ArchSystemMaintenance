@@ -21,12 +21,13 @@ def upgrade_alerts(last_upgrade):
     arch_news = xmltodict.parse(data)
 
     alerts = 0
-    for news_post in arch_news['rss']['channel']['item']:
-        if parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
+    for news_post in reversed(arch_news['rss']['channel']['item']):
+        if last_upgrade == '0' or parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
             alerts = 1
-            print("Title: ", news_post['title'])
-            print("Date: ", news_post['pubDate'])
-            print("Description: ", clean_html(news_post['description']))
+            print('~' * 75)
+            print("TITLE: ", news_post['title'])
+            print("DATE: ", news_post['pubDate'])
+            print("DESCRIPTION: ", clean_html(news_post['description']))
             print("\n")
     
     return alerts

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 fetch_warnings() {
+	# Fetch and warn the user if any known problems have been published since the last upgrade
 	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
 
 	python ./Scripts/ArchNews.py $LAST_UPGRADE
@@ -8,13 +9,19 @@ fetch_warnings() {
 	
 	if [ $ALERTS == 1 ]; then
 		echo "WARNING: This upgrade requires out-of-the-ordinary user intervention."
-		echo "Continue only after fully resolving the issue(s) above."
+		echo "Continue only after fully resolving the above issue(s)."
+		echo ""
 
 		read -r -p "Are you ready to continue? [y/N]"
 		if [ $REPLY != "y" ]; then
 			exit
 		fi
 	fi
+}
+
+arch_news() {
+	# Grab the latest Arch Linux news
+	python ./Scripts/ArchNews.py 0
 }
 
 update_mirrorlist() {
@@ -121,11 +128,11 @@ clean_config() {
 system_upgrade() {
 	# Upgrade the System
 	fetch_warnings
-	#update_mirrorlist
-	#upgrade_system
-	#rebuild_aur
-	#remove_orphans
-	#notify_actions
+	update_mirrorlist
+	upgrade_system
+	rebuild_aur
+	remove_orphans
+	notify_actions
 }
 
 system_clean() {
@@ -136,16 +143,26 @@ system_clean() {
 	# TODO: rmlint if installed?
 }
 
+system_security() {
+	# Check system for security issues
+	echo "TODO"
+}
+
+fetch_news() {
+	# Get latest news
+	arch_news
+}
+
+
 menu_options() {
 	# Display menu options
 	clear
 	echo "1) Upgrade the System"
 	echo "2) Clean the Filesystem"
-	# TODO: 3) System security scanning options?
+	echo "3) Check system security"
+	echo "4) Fetch latest Arch Linux news"
 	echo "0) Exit"
 }
-
-# TODO: Load and save user settings / preferences?
 
 # Take appropriate action
 while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ];
@@ -156,6 +173,12 @@ do
 			;;
 		"2")
 			system_clean
+			;;
+		"3")
+			system_security
+			;;
+		"4")
+			fetch_news
 			;;
 		*)
 			echo "Please choose an existing option"
