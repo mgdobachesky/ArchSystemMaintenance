@@ -1,4 +1,4 @@
-# Script originally written by Jakub Klinkovský here: 
+# rmjunk.py is a modified version of a script written by Jakub Klinkovský here: 
 # https://github.com/lahwaacz/Scripts/blob/master/rmshit.py
 
 import os
