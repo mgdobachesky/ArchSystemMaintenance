@@ -137,6 +137,8 @@ remove_lint() {
 	./rmlint.sh -xd
 	rm rmlint.sh
 	rm rmlint.json
+
+	# TODO: avoid deleting only certain empty directories in $HOME, rather than all of them
 }
 
 system_upgrade() {
@@ -160,6 +162,9 @@ system_clean() {
 system_security() {
 	# Check system for security issues
 	echo "TODO"
+
+	# TODO: tripwire?
+	# TODO: rkhunter?
 }
 
 fetch_news() {
@@ -176,6 +181,8 @@ menu_options() {
 	echo "3) Check system security"
 	echo "4) Fetch latest Arch Linux news"
 	echo "0) Exit"
+
+	# TODO: Backup/restore system?
 }
 
 # Take appropriate action
