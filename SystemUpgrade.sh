@@ -7,11 +7,13 @@ fetch_warnings() {
 	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
 	ARCH_NEWS="$(curl https://www.archlinux.org/feeds/news/)"
 
-	xml sel -t -m "/rss/channel/item" \
+	UPDATES="$(xml sel -t -m "/rss/channel/item" \
 	-o "Title: " -v "title"  -n \
 	-o "Date: " -v "pubDate" -n \
 	-o "Description: " -v "description" -n -n \
-	<<< "$ARCH_NEWS"
+	<<< "$ARCH_NEWS")"
+
+	echo $(UPDATES[1])
 }
 
 update_mirrorlist() {
@@ -23,7 +25,7 @@ update_mirrorlist() {
 
 upgrade_system() {
 	# Upgrade the system
-	sudo pacman -Syu --noconfirm
+	sudo pacman -Syu
 }
 
 rebuild_aur() {
@@ -36,7 +38,7 @@ rebuild_aur() {
 			then
 				cd "${D}"
 				git pull origin master
-				makepkg -sirc --noconfirm
+				makepkg -sirc
 			fi
 
 		done
@@ -97,7 +99,7 @@ notify_actions() {
 
 clean_cache() {
 	# Remove all packages from cache that are not currently installed
-	sudo pacman -Sc --noconfirm
+	sudo pacman -Sc
 }
 
 clean_symlinks() {
@@ -117,12 +119,12 @@ clean_config() {
 
 system_upgrade() {
 	# Upgrade the System
-	#fetch_warnings
-	update_mirrorlist
-	upgrade_system
-	rebuild_aur
-	remove_orphans
-	notify_actions
+	fetch_warnings
+	#update_mirrorlist
+	#upgrade_system
+	#rebuild_aur
+	#remove_orphans
+	#notify_actions
 }
 
 system_clean() {
