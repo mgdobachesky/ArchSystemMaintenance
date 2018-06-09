@@ -111,7 +111,7 @@ clean_cache() {
 
 clean_symlinks() {
 	# Remove broken symlinks
-	BROKEN_SYMLINKS="$(find -xtype l -print)"
+	BROKEN_SYMLINKS="$(sudo find ~ -xtype l -print)"
 	if [ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ];
 	then
 		echo "BROKEN SYMLINKS: $BROKEN_SYMLINKS"
@@ -119,7 +119,7 @@ clean_symlinks() {
 		if [ $REPLY == "y" ]; then
 			while IFS= read -r -d $'\0'; do 
 				rm $REPLY
-			done < <(find -xtype l -print0)
+			done < <(sudo find ~ -xtype l -print0)
 		fi
 	fi	
 }
@@ -130,6 +130,14 @@ clean_config() {
 
 	# TODO: Find a way to automate the cleaning of ~/, ~/.config/, ~/.cache/, and ~/.local/share
 	# TODO: rmshit-like script?
+}
+
+remove_lint() {
+	# Run rmlint for further system cleaning
+	rmlint ~
+	sed -i "s/^handle_emptydir[^\(\)].*//" rmlint.sh
+	./rmlint.sh
+	rm rmlint.json
 }
 
 system_upgrade() {
@@ -147,7 +155,7 @@ system_clean() {
 	clean_cache
 	clean_symlinks
 	clean_config
-	# TODO: rmlint if installed?
+	remove_lint
 }
 
 system_security() {
