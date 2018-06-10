@@ -34,25 +34,25 @@ upgrade_system() {
 }
 
 aur_list() {
-	list=""
+	LIST=""
 	while IFS= read -r -d $'\0'; do
 		for D in $REPLY/*/; do 
 			if [ -d "$D" ]; then
-				list="${list},${D}"
+				LIST="${LIST},${D}"
 			fi
 		done
 	done < <(sudo find /home -name ".aur" -print0)
 
-	echo "${list:1}"
+	echo "${LIST:1}"
 }
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	local aur_list=$(aur_list)
-	IFS=$',' read -a aur_list <<< "${aur_list}"
+	local AUR_LIST=$(aur_list)
+	IFS=$',' read -a AUR_LIST <<< "${AUR_LIST}"
 
 	ORIGIN_DIR="$(pwd)"
-	for aur_dir in "${aur_list[@]}"; do
+	for aur_dir in "${AUR_LIST[@]}"; do
 		cd "$aur_dir"
 		git pull origin master
 		makepkg -sirc
@@ -83,7 +83,7 @@ remove_dropped() {
 	# Remove dropped packages
 	DROPPED_LIST="$(pacman -Qmq)"
 	if [ -n "${DROPPED_LIST/[ ]*\n/}" ]; then
-		local aur_list=$(aur_list)
+		local AUR_LIST=$(aur_list)
 
 		DROPPED_ARRAY=()
 		while IFS=$'\n' read -a DROPPED_ITEM; do
@@ -92,7 +92,7 @@ remove_dropped() {
 
 		AUR_FILTERED=""
 		for DROPPED_ITEM in "${DROPPED_ARRAY[@]}"; do
-			IS_AUR="$(echo "$aur_list" | grep "$DROPPED_ITEM")"
+			IS_AUR="$(echo "$AUR_LIST" | grep "$DROPPED_ITEM")"
 			if [ ! -n "${IS_AUR/[ ]*\n/}" ]; then
 				AUR_FILTERED="${AUR_FILTERED} ${DROPPED_ITEM}"
 			fi
@@ -202,7 +202,7 @@ menu_options() {
 }
 
 # Take appropriate action
-while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ]; do
+while menu_options && read -r -p 'Action to take: ' RESPONSE && [ "$RESPONSE" != "0" ]; do
 	case "$response" in
 		"1")
 			fetch_news
