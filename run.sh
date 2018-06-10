@@ -109,11 +109,12 @@ remove_dropped() {
 }
 
 upgrade_alerts() {
-	# Pay attention to alerts while upgrading the system
-	echo "NOTICE: Check /var/log/pacman.log for alerts that might of come up while upgrading the system."
-
-	# TODO: Use '/var/log/pacman.log' to automatically pick up any alerts for the user
-	# TODO: Maybe save last update and retrieve all pacman warnings since then
+	# Get any alerts that might have occured while upgrading the system
+	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
+	WARNINGS="$(cat /var/log/pacman.log | grep -i "$LAST_UPGRADE.*WARNING")"
+	if [ -n "${WARNINGS/[ ]*\n/}" ]; then
+		printf "\nWARNINGS:\n$WARNINGS\n"
+	fi
 }
 
 find_pacfiles() {
@@ -121,7 +122,7 @@ find_pacfiles() {
 	sudo updatedb
 	PACFILES="$(locate --existing --regex "\.pac(new|save)$")"
 	if [ -n "${PACFILES/[ ]*\n/}" ]; then
-		echo "PACFILES: $PACFILES"
+		printf "\nPACFILES:\n$PACFILES\n"
 	fi
 }
 
@@ -153,7 +154,6 @@ clean_symlinks() {
 clean_config() {
 	# Clean up old configuration files
 	python ./Scripts/rmjunk.py
-	echo "NOTICE: Check ~/, ~/.config/, ~/.cache/, and ~/.local/share to further clean up old and potentially conflicting configuration files."
 }
 
 remove_lint() {
@@ -167,13 +167,13 @@ remove_lint() {
 
 system_upgrade() {
 	# Upgrade the System
-	fetch_warnings
-	update_mirrorlist
-	upgrade_system
-	rebuild_aur
-	remove_orphans
-	remove_dropped
-	remove_pacfiles
+	#fetch_warnings
+	#update_mirrorlist
+	#upgrade_system
+	#rebuild_aur
+	#remove_orphans
+	#remove_dropped
+	#remove_pacfiles
 	notify_actions
 }
 
