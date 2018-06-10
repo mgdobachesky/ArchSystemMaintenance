@@ -111,7 +111,7 @@ clean_cache() {
 
 clean_symlinks() {
 	# Remove broken symlinks
-	BROKEN_SYMLINKS="$(sudo find ~ -xtype l -print)"
+	BROKEN_SYMLINKS="$(sudo find /home -xtype l -print)"
 	if [ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ];
 	then
 		echo "BROKEN SYMLINKS: $BROKEN_SYMLINKS"
@@ -119,7 +119,7 @@ clean_symlinks() {
 		if [ $REPLY == "y" ]; then
 			while IFS= read -r -d $'\0'; do 
 				rm $REPLY
-			done < <(sudo find ~ -xtype l -print0)
+			done < <(sudo find /home -xtype l -print0)
 		fi
 	fi	
 }
@@ -132,13 +132,11 @@ clean_config() {
 
 remove_lint() {
 	# Run rmlint for further system cleaning
-	rmlint ~
-	sed -i "s/^handle_emptydir[^\(\)].*//" rmlint.sh
+	rmlint /home
+	sed -i -r "s/^handle_emptydir.*(Desktop|Documents|Downloads|Music|Pictures|Public|Templates|Videos).*//" rmlint.sh
 	./rmlint.sh -x
 	rm rmlint.sh
 	rm rmlint.json
-
-	# TODO: avoid deleting only certain empty directories in $HOME, rather than all of them
 }
 
 system_upgrade() {
