@@ -10,7 +10,6 @@ fetch_warnings() {
 	if [ $ALERTS == 1 ]; then
 		echo "WARNING: This upgrade requires out-of-the-ordinary user intervention."
 		echo "Continue only after fully resolving the above issue(s)."
-		echo ""
 
 		read -r -p "Are you ready to continue? [y/N]"
 		if [ $REPLY != "y" ]; then
@@ -34,20 +33,30 @@ upgrade_system() {
 	sudo pacman -Syu
 }
 
-rebuild_aur() {
-	# Rebuild AUR packages
-	ORIGIN_DIR="$(pwd)"
+aur_list() {
+	list=""
 	while IFS= read -r -d $'\0'; do
-		cd $REPLY
 		for D in $REPLY/*/; do 
 			if [ -d "$D" ]; then
-				cd "${D}"
-				git pull origin master
-				makepkg -sirc
+				list="${list}_${D}"
 			fi
-
 		done
 	done < <(sudo find /home -name ".aur" -print0)
+
+	echo "${list:1}"
+}
+
+rebuild_aur() {
+	# Rebuild AUR packages
+	local aur_list=$(aur_list)
+	IFS='_' read -r -a aur_list <<< "${aur_list}"
+
+	ORIGIN_DIR="$(pwd)"
+	for aur_dir in "${aur_list[@]}"; do
+		cd "$aur_dir"
+		git pull origin master
+		makepkg -sirc
+	done
 	cd $ORIGIN_DIR
 }
 
@@ -141,13 +150,13 @@ remove_lint() {
 
 system_upgrade() {
 	# Upgrade the System
-	fetch_warnings
-	update_mirrorlist
-	upgrade_system
+	#fetch_warnings
+	#update_mirrorlist
+	#upgrade_system
 	rebuild_aur
-	remove_pacfiles
-	remove_orphans
-	notify_actions
+	#remove_pacfiles
+	#remove_orphans
+	#notify_actions
 }
 
 system_clean() {
@@ -172,7 +181,7 @@ menu_options() {
 	echo "3) Clean the Filesystem"
 	echo "0) Exit"
 
-	# TODO System security options? (tripwire, rkhunter)
+	# TODO: System security options? (tripwire, rkhunter)
 	# TODO: Backup/restore system?
 }
 
