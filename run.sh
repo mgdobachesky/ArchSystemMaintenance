@@ -159,14 +159,6 @@ system_clean() {
 	remove_lint
 }
 
-system_security() {
-	# Check system for security issues
-	echo "TODO"
-
-	# TODO: tripwire?
-	# TODO: rkhunter?
-}
-
 fetch_news() {
 	# Get latest news
 	arch_news
@@ -178,10 +170,10 @@ menu_options() {
 	clear
 	echo "1) Upgrade the System"
 	echo "2) Clean the Filesystem"
-	echo "3) Check system security"
-	echo "4) Fetch latest Arch Linux news"
+	echo "3) Fetch latest Arch Linux news"
 	echo "0) Exit"
 
+	# TODO System security options? (tripwire, rkhunter)
 	# TODO: Backup/restore system?
 }
 
@@ -196,9 +188,6 @@ do
 			system_clean
 			;;
 		"3")
-			system_security
-			;;
-		"4")
 			fetch_news
 			;;
 		*)
