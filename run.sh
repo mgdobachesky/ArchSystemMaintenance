@@ -202,8 +202,8 @@ menu_options() {
 }
 
 # Take appropriate action
-while menu_options && read -r -p 'Action to take: ' RESPONSE && [ "$RESPONSE" != "0" ]; do
-	case "$response" in
+while menu_options && read -r -p 'Action to take: ' && [ "$REPLY" != "0" ]; do
+	case "$REPLY" in
 		"1")
 			fetch_news
 			;;
