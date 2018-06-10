@@ -182,8 +182,8 @@ system_clean() {
 	# Clean the filesystem
 	clean_cache
 	clean_symlinks
-	remove_lint
 	clean_config
+	remove_lint
 }
 
 fetch_news() {
