@@ -86,15 +86,15 @@ remove_dropped() {
 		local aur_list=$(aur_list)
 
 		DROPPED_ARRAY=()
-		while IFS=$'\n' read -a DROPPED_LIST; do
-			DROPPED_ARRAY+=("${DROPPED_LIST[0]}")
+		while IFS=$'\n' read -a DROPPED_ITEM; do
+			DROPPED_ARRAY+=("${DROPPED_ITEM[0]}")
 		done <<< "${DROPPED_LIST}"
 
 		AUR_FILTERED=""
-		for DROPPED in "${DROPPED_ARRAY[@]}"; do
-			IS_AUR="$(echo "$aur_list" | grep "$DROPPED")"
+		for DROPPED_ITEM in "${DROPPED_ARRAY[@]}"; do
+			IS_AUR="$(echo "$aur_list" | grep "$DROPPED_ITEM")"
 			if [ ! -n "${IS_AUR/[ ]*\n/}" ]; then
-				AUR_FILTERED="${AUR_FILTERED} ${DROPPED}"
+				AUR_FILTERED="${AUR_FILTERED} ${DROPPED_ITEM}"
 			fi
 		done
 
@@ -167,14 +167,14 @@ remove_lint() {
 
 system_upgrade() {
 	# Upgrade the System
-	#fetch_warnings
-	#update_mirrorlist
-	#upgrade_system
-	#rebuild_aur
-	#remove_orphans
+	fetch_warnings
+	update_mirrorlist
+	upgrade_system
+	rebuild_aur
+	remove_orphans
 	remove_dropped
-	#remove_pacfiles
-	#notify_actions
+	remove_pacfiles
+	notify_actions
 }
 
 system_clean() {
