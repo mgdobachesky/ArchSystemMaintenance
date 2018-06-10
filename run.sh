@@ -167,9 +167,9 @@ fetch_news() {
 menu_options() {
 	# Display menu options
 	clear
-	echo "1) Upgrade the System"
-	echo "2) Clean the Filesystem"
-	echo "3) Fetch latest Arch Linux news"
+	echo "1) Arch Linux News"
+	echo "2) Upgrade the System"
+	echo "3) Clean the Filesystem"
 	echo "0) Exit"
 
 	# TODO System security options? (tripwire, rkhunter)
@@ -180,13 +180,13 @@ menu_options() {
 while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ]; do
 	case "$response" in
 		"1")
-			system_upgrade
+			fetch_news
 			;;
 		"2")
-			system_clean
+			system_upgrade
 			;;
 		"3")
-			fetch_news
+			system_clean
 			;;
 		*)
 			echo "Please choose an existing option"
