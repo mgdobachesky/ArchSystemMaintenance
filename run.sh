@@ -167,13 +167,13 @@ remove_lint() {
 
 system_upgrade() {
 	# Upgrade the System
-	#fetch_warnings
-	#update_mirrorlist
-	#upgrade_system
-	#rebuild_aur
-	#remove_orphans
-	#remove_dropped
-	#remove_pacfiles
+	fetch_warnings
+	update_mirrorlist
+	upgrade_system
+	rebuild_aur
+	remove_orphans
+	remove_dropped
+	remove_pacfiles
 	notify_actions
 }
 
@@ -198,9 +198,6 @@ menu_options() {
 	echo "2) Upgrade the System"
 	echo "3) Clean the Filesystem"
 	echo "0) Exit"
-
-	# TODO: System security options? (tripwire, rkhunter)
-	# TODO: Backup/restore system?
 }
 
 # Take appropriate action
