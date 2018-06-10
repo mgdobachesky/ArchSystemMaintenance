@@ -27,8 +27,6 @@ arch_news() {
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	sudo reflector --country 'United States' --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
-
-	# TODO: Maybe delete mirrorlist.pacnew if it exists?
 }
 
 upgrade_system() {
@@ -52,6 +50,13 @@ rebuild_aur() {
 		done
 	done < <(sudo find /home -name ".aur" -print0)
 	cd $ORIGIN_DIR
+}
+
+remove_pacfiles() {
+	# Automatically remove specified pacfiles
+	if [ -f /etc/pacman.d/mirrorlist.pacnew ]; then
+		sudo rm /etc/pacman.d/mirrorlist.pacnew
+	fi
 }
 
 remove_orphans() {
@@ -145,6 +150,7 @@ system_upgrade() {
 	update_mirrorlist
 	upgrade_system
 	rebuild_aur
+	remove_pacfiles
 	remove_orphans
 	notify_actions
 }
