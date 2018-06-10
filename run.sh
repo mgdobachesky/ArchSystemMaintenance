@@ -79,6 +79,35 @@ remove_orphans() {
 	fi
 }
 
+remove_dropped() {
+	# Remove dropped packages
+	DROPPED_LIST="$(pacman -Qmq)"
+	if [ -n "${DROPPED_LIST/[ ]*\n/}" ]; then
+		local aur_list=$(aur_list)
+
+		DROPPED_ARRAY=()
+		while IFS=$'\n' read -a DROPPED_LIST; do
+			DROPPED_ARRAY+=("${DROPPED_LIST[0]}")
+		done <<< "${DROPPED_LIST}"
+
+		AUR_FILTERED=""
+		for DROPPED in "${DROPPED_ARRAY[@]}"; do
+			IS_AUR="$(echo "$aur_list" | grep "$DROPPED")"
+			if [ ! -n "${IS_AUR/[ ]*\n/}" ]; then
+				AUR_FILTERED="${AUR_FILTERED} ${DROPPED}"
+			fi
+		done
+
+		if [ -n "${AUR_FILTERED/[ ]*\n/}" ]; then
+			echo "DROPPED PACKAGES: $AUR_FILTERED"
+			read -r -p "Do you want to remove the above dropped packages? [y/N]"
+			if [ $REPLY == "y" ]; then
+				sudo pacman -Rns "$AUR_FILTERED"
+			fi
+		fi
+	fi
+}
+
 upgrade_alerts() {
 	# Pay attention to alerts while upgrading the system
 	echo "NOTICE: Check /var/log/pacman.log for alerts that might of come up while upgrading the system."
@@ -96,22 +125,10 @@ find_pacfiles() {
 	fi
 }
 
-check_dropped() {
-	# Check for dropped packages
-	DROPPED="$(pacman -Qm)"
-	if [ -n "${DROPPED/[ ]*\n/}" ]; then
-		echo "DROPPED: $DROPPED"
-	fi
-
-	# TODO: Don't display AUR packages in the dropped list
-	# TODO: Delete dropped packages
-}
-
 notify_actions() {
 	# Notify of anything worth mentioning
 	upgrade_alerts
 	find_pacfiles
-	check_dropped
 }
 
 clean_cache() {
@@ -153,9 +170,10 @@ system_upgrade() {
 	#fetch_warnings
 	#update_mirrorlist
 	#upgrade_system
-	rebuild_aur
-	#remove_pacfiles
+	#rebuild_aur
 	#remove_orphans
+	remove_dropped
+	#remove_pacfiles
 	#notify_actions
 }
 
