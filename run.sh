@@ -40,8 +40,7 @@ rebuild_aur() {
 	while IFS= read -r -d $'\0'; do
 		cd $REPLY
 		for D in $REPLY/*/; do 
-			if [ -d "$D" ]; 
-			then
+			if [ -d "$D" ]; then
 				cd "${D}"
 				git pull origin master
 				makepkg -sirc
@@ -62,8 +61,7 @@ remove_pacfiles() {
 remove_orphans() {
 	# Remove unused orphan packages
 	ORPHANED="$(pacman -Qtd)"
-	if [ -n "${ORPHANED/[ ]*\n/}" ];
-	then
+	if [ -n "${ORPHANED/[ ]*\n/}" ]; then
 		echo "ORPHANED PACKAGES: $ORPHANED"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [ $REPLY == "y" ]; then
@@ -84,17 +82,15 @@ find_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
 	sudo updatedb
 	PACFILES="$(locate --existing --regex "\.pac(new|save)$")"
-	if [ -n "${PACFILES/[ ]*\n/}" ];
-	then
+	if [ -n "${PACFILES/[ ]*\n/}" ]; then
 		echo "PACFILES: $PACFILES"
 	fi
 }
 
 check_dropped() {
-	# Check for dropped packages (NOTE: AUR packages are included in output)
+	# Check for dropped packages
 	DROPPED="$(pacman -Qm)"
-	if [ -n "${DROPPED/[ ]*\n/}" ];
-	then
+	if [ -n "${DROPPED/[ ]*\n/}" ]; then
 		echo "DROPPED: $DROPPED"
 	fi
 
@@ -117,8 +113,7 @@ clean_cache() {
 clean_symlinks() {
 	# Remove broken symlinks
 	BROKEN_SYMLINKS="$(sudo find /home -xtype l -print)"
-	if [ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ];
-	then
+	if [ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ]; then
 		echo "BROKEN SYMLINKS: $BROKEN_SYMLINKS"
 		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
 		if [ $REPLY == "y" ]; then
@@ -182,8 +177,7 @@ menu_options() {
 }
 
 # Take appropriate action
-while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ];
-do
+while menu_options && read -r -p 'Action to take: ' response && [ "$response" != "0" ]; do
 	case "$response" in
 		"1")
 			system_upgrade
