@@ -8,8 +8,8 @@ fetch_warnings() {
 	ALERTS=$?
 	
 	if [ $ALERTS == 1 ]; then
-		echo "WARNING: This upgrade requires out-of-the-ordinary user intervention."
-		echo "Continue only after fully resolving the above issue(s)."
+		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention."
+		printf "\nContinue only after fully resolving the above issue(s).\n\n"
 
 		read -r -p "Are you ready to continue? [y/N]"
 		if [ $REPLY != "y" ]; then
@@ -71,7 +71,7 @@ remove_orphans() {
 	# Remove unused orphan packages
 	ORPHANED="$(pacman -Qtd)"
 	if [ -n "${ORPHANED/[ ]*\n/}" ]; then
-		echo "ORPHANED PACKAGES: $ORPHANED"
+		printf "\nORPHANED PACKAGES:\n$ORPHANED\n"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [ $REPLY == "y" ]; then
 			sudo pacman -Rns $(pacman -Qtdq)
@@ -100,7 +100,7 @@ remove_dropped() {
 		AUR_FILTERED="${AUR_FILTERED:1}"
 
 		if [ -n "${AUR_FILTERED/[ ]*\n/}" ]; then
-			echo "DROPPED PACKAGES: $AUR_FILTERED"
+			printf "\nDROPPED PACKAGES:\n$AUR_FILTERED\n"
 			read -r -p "Do you want to remove the above dropped packages? [y/N]"
 			if [ $REPLY == "y" ]; then
 				sudo pacman -Rns "$AUR_FILTERED"
@@ -142,7 +142,7 @@ clean_symlinks() {
 	# Remove broken symlinks
 	BROKEN_SYMLINKS="$(sudo find /home -xtype l -print)"
 	if [ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ]; then
-		echo "BROKEN SYMLINKS: $BROKEN_SYMLINKS"
+		printf "\nBROKEN SYMLINKS:\n$BROKEN_SYMLINKS\n"
 		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
 		if [ $REPLY == "y" ]; then
 			while IFS= read -r -d $'\0'; do 
@@ -168,14 +168,14 @@ remove_lint() {
 
 system_upgrade() {
 	# Upgrade the System
-	#fetch_warnings
-	#update_mirrorlist
-	#upgrade_system
+	fetch_warnings
+	update_mirrorlist
+	upgrade_system
 	rebuild_aur
-	#remove_orphans
+	remove_orphans
 	remove_dropped
-	#remove_pacfiles
-	#notify_actions
+	remove_pacfiles
+	notify_actions
 }
 
 system_clean() {
