@@ -38,7 +38,7 @@ aur_list() {
 	while IFS= read -r -d $'\0'; do
 		for D in $REPLY/*/; do 
 			if [ -d "$D" ]; then
-				list="${list}_${D}"
+				list="${list},${D}"
 			fi
 		done
 	done < <(sudo find /home -name ".aur" -print0)
@@ -49,7 +49,7 @@ aur_list() {
 rebuild_aur() {
 	# Rebuild AUR packages
 	local aur_list=$(aur_list)
-	IFS='_' read -r -a aur_list <<< "${aur_list}"
+	IFS=$',' read -a aur_list <<< "${aur_list}"
 
 	ORIGIN_DIR="$(pwd)"
 	for aur_dir in "${aur_list[@]}"; do
@@ -87,7 +87,7 @@ remove_dropped() {
 
 		DROPPED_ARRAY=()
 		while IFS=$'\n' read -a DROPPED_ITEM; do
-			DROPPED_ARRAY+=("${DROPPED_ITEM[0]}")
+			DROPPED_ARRAY+=("$DROPPED_ITEM")
 		done <<< "${DROPPED_LIST}"
 
 		AUR_FILTERED=""
@@ -97,6 +97,7 @@ remove_dropped() {
 				AUR_FILTERED="${AUR_FILTERED} ${DROPPED_ITEM}"
 			fi
 		done
+		AUR_FILTERED="${AUR_FILTERED:1}"
 
 		if [ -n "${AUR_FILTERED/[ ]*\n/}" ]; then
 			echo "DROPPED PACKAGES: $AUR_FILTERED"
@@ -167,14 +168,14 @@ remove_lint() {
 
 system_upgrade() {
 	# Upgrade the System
-	fetch_warnings
-	update_mirrorlist
-	upgrade_system
+	#fetch_warnings
+	#update_mirrorlist
+	#upgrade_system
 	rebuild_aur
-	remove_orphans
+	#remove_orphans
 	remove_dropped
-	remove_pacfiles
-	notify_actions
+	#remove_pacfiles
+	#notify_actions
 }
 
 system_clean() {
