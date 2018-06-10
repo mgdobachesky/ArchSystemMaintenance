@@ -21,7 +21,7 @@ fetch_warnings() {
 
 arch_news() {
 	# Grab the latest Arch Linux news
-	python ./Scripts/ArchNews.py 0
+	python ./Scripts/ArchNews.py
 }
 
 update_mirrorlist() {
@@ -126,8 +126,8 @@ clean_symlinks() {
 
 clean_config() {
 	# Clean up old configuration files
-	echo "NOTICE: Check ~/, ~/.config/, ~/.cache/, and ~/.local/share for old configuration files."
-	python ./Scripts/rmjunk.py 
+	python ./Scripts/rmjunk.py
+	echo "NOTICE: Check ~/, ~/.config/, ~/.cache/, and ~/.local/share to further clean up old and potentially conflicting configuration files."
 }
 
 remove_lint() {
@@ -153,8 +153,8 @@ system_clean() {
 	# Clean the filesystem
 	clean_cache
 	clean_symlinks
-	clean_config
 	remove_lint
+	clean_config
 }
 
 fetch_news() {

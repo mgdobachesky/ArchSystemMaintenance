@@ -11,7 +11,7 @@ def clean_html(raw_html):
     return cleantext
 
 
-def upgrade_alerts(last_upgrade):
+def upgrade_alerts(last_upgrade = False):
 
     url = 'https://www.archlinux.org/feeds/news/'
     file = urllib.request.urlopen(url)
@@ -22,7 +22,7 @@ def upgrade_alerts(last_upgrade):
 
     alerts = 0
     for news_post in reversed(arch_news['rss']['channel']['item']):
-        if last_upgrade == '0' or parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
+        if last_upgrade == False or parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
             alerts = 1
             print('~' * 75)
             print("TITLE: ", news_post['title'])
@@ -33,4 +33,5 @@ def upgrade_alerts(last_upgrade):
     return alerts
 
 
-sys.exit(upgrade_alerts(sys.argv[1]))
+if __name__ == '__main__':
+    sys.exit(upgrade_alerts(sys.argv[1])) if len(sys.argv) > 1 else upgrade_alerts()
