@@ -21,7 +21,7 @@ def upgrade_alerts(last_upgrade = False):
     arch_news = xmltodict.parse(data)
 
     alerts = 0
-    for news_post in reversed(arch_news['rss']['channel']['item']):
+    for news_post in arch_news['rss']['channel']['item']:
         if last_upgrade == False or parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
             alerts = 1
             print('~' * 75)

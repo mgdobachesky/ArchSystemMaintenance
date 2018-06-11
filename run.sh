@@ -20,7 +20,7 @@ fetch_warnings() {
 
 arch_news() {
 	# Grab the latest Arch Linux news
-	python ./Scripts/ArchNews.py
+	python ./Scripts/ArchNews.py | less
 }
 
 update_mirrorlist() {
