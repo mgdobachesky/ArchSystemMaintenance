@@ -4,15 +4,15 @@ fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
 	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
 
-	python ./Scripts/ArchNews.py $LAST_UPGRADE
-	ALERTS=$?
+	python ./Scripts/ArchNews.py "$LAST_UPGRADE"
+	ALERTS="$?"
 	
-	if [[ $ALERTS == 1 ]]; then
+	if [[ "$ALERTS" == 1 ]]; then
 		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention."
 		printf "\nContinue only after fully resolving the above issue(s).\n\n"
 
 		read -r -p "Are you ready to continue? [y/N]"
-		if [[ $REPLY != "y" ]]; then
+		if [[ "$REPLY" != "y" ]]; then
 			exit
 		fi
 	fi
@@ -36,7 +36,7 @@ upgrade_system() {
 aur_list() {
 	LIST=""
 	while IFS= read -r -d $'\0'; do
-		for D in $REPLY/*/; do 
+		for D in "$REPLY"/*/; do 
 			if [[ -d "$D" ]]; then
 				LIST="${LIST},${D}"
 			fi
@@ -48,7 +48,7 @@ aur_list() {
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	local AUR_LIST=$(aur_list)
+	local AUR_LIST="$(aur_list)"
 	IFS=$',' read -a AUR_LIST <<< "${AUR_LIST}"
 
 	ORIGIN_DIR="$(pwd)"
@@ -57,7 +57,7 @@ rebuild_aur() {
 		git pull origin master
 		makepkg -sirc
 	done
-	cd $ORIGIN_DIR
+	cd "$ORIGIN_DIR"
 }
 
 remove_pacfiles() {
@@ -73,8 +73,8 @@ remove_orphans() {
 	if [[ -n "${ORPHANED/[ ]*\n/}" ]]; then
 		printf "\nORPHANED PACKAGES:\n$ORPHANED\n"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
-		if [[ $REPLY == "y" ]]; then
-			sudo pacman -Rns $(pacman -Qtdq)
+		if [[ "$REPLY" == "y" ]]; then
+			sudo pacman -Rns "$(pacman -Qtdq)"
 		fi
 	fi
 }
@@ -83,7 +83,7 @@ remove_dropped() {
 	# Remove dropped packages
 	DROPPED_LIST="$(pacman -Qmq)"
 	if [[ -n "${DROPPED_LIST/[ ]*\n/}" ]]; then
-		local AUR_LIST=$(aur_list)
+		local AUR_LIST="$(aur_list)"
 
 		DROPPED_ARRAY=()
 		while IFS=$'\n' read -a DROPPED_ITEM; do
@@ -102,7 +102,7 @@ remove_dropped() {
 		if [[ -n "${AUR_FILTERED/[ ]*\n/}" ]]; then
 			printf "\nDROPPED PACKAGES:\n$AUR_FILTERED\n"
 			read -r -p "Do you want to remove the above dropped packages? [y/N]"
-			if [[ $REPLY == "y" ]]; then
+			if [[ "$REPLY" == "y" ]]; then
 				sudo pacman -Rns "$AUR_FILTERED"
 			fi
 		fi
@@ -144,9 +144,9 @@ clean_symlinks() {
 	if [[ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ]]; then
 		printf "\nBROKEN SYMLINKS:\n$BROKEN_SYMLINKS\n"
 		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
-		if [[ $REPLY == "y" ]]; then
+		if [[ "$REPLY" == "y" ]]; then
 			while IFS= read -r -d $'\0'; do 
-				rm $REPLY
+				rm "$REPLY"
 			done < <(sudo find /home -xtype l -print0)
 		fi
 	fi	
