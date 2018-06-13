@@ -191,32 +191,14 @@ fetch_news() {
 	arch_news
 }
 
-
-menu_options() {
-	# Display menu options
-	clear
-	echo "1) Arch Linux News"
-	echo "2) Upgrade the System"
-	echo "3) Clean the Filesystem"
-	echo "0) Exit"
-}
-
 # Take appropriate action
-while menu_options && read -r -p 'Action to take: ' && [ "$REPLY" != "0" ]; do
-	case "$REPLY" in
-		"1")
-			fetch_news
-			;;
-		"2")
-			system_upgrade
-			;;
-		"3")
-			system_clean
-			;;
-		*)
-			echo "Please choose an existing option"
-			;;
-	esac
-
-	read -r -p 'Press any key to continue...'	
+PS3='Action to take: '
+select opt in "Arch Linux News" "Upgrade the System" "Clean the Filesystem" "Exit"; do
+    case $REPLY in
+        1) fetch_news;;
+        2) system_upgrade;;
+        3) system_clean;;
+        4) break;;
+        *) echo "Please choose an existing option";;
+    esac
 done
