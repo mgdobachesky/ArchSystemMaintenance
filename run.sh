@@ -25,7 +25,10 @@ arch_news() {
 
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
-	sudo reflector --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+	read -r -p "Do you want to get an updated mirrorlist? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		sudo reflector --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+	fi
 }
 
 upgrade_system() {
