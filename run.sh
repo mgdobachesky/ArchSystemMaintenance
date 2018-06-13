@@ -25,7 +25,7 @@ arch_news() {
 
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
-	sudo reflector --country 'United States' --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+	sudo reflector --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 }
 
 upgrade_system() {
