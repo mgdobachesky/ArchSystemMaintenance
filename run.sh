@@ -57,7 +57,6 @@ rebuild_aur() {
 	ORIGIN_DIR="$(pwd)"
 	for aur_dir in "${AUR_LIST[@]}"; do
 		cd "$aur_dir"
-		git pull origin master
 		makepkg -sirc
 	done
 	cd "$ORIGIN_DIR"
