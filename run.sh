@@ -159,11 +159,14 @@ clean_config() {
 
 remove_lint() {
 	# Run rmlint for further system cleaning
-	rmlint /home
-	sed -i -r "s/^handle_emptydir.*(Desktop|Documents|Downloads|Music|Pictures|Public|Templates|Videos).*//" rmlint.sh
-	./rmlint.sh -x
-	rm rmlint.sh
-	rm rmlint.json
+	read -r -p "Do you want to run rmlint? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		rmlint /home
+		sed -i -r "s/^handle_emptydir.*(Desktop|Documents|Downloads|Music|Pictures|Public|Templates|Videos).*//" rmlint.sh
+		./rmlint.sh -x
+		rm rmlint.sh
+		rm rmlint.json
+	fi
 }
 
 system_upgrade() {
