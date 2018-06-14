@@ -71,12 +71,12 @@ remove_pacfiles() {
 
 remove_orphans() {
 	# Remove unused orphan packages
-	ORPHANED="$(pacman -Qtd)"
-	if [[ -n "${ORPHANED/[ ]*\n/}" ]]; then
-		printf "\nORPHANED PACKAGES:\n$ORPHANED\n"
+	mapfile -t orphans < <(pacman -Qtdq)
+	if [[ ${orphans[*]} ]]; then
+		printf "\nORPHANED PACKAGES:\n$orphans\n"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns "$(pacman -Qtdq)"
+			sudo pacman -Rns "${orphans[@]}"
 		fi
 	fi
 }
@@ -142,16 +142,14 @@ clean_cache() {
 
 clean_symlinks() {
 	# Remove broken symlinks
-	BROKEN_SYMLINKS="$(sudo find /home -xtype l -print)"
-	if [[ -n "${BROKEN_SYMLINKS/[ ]*\n/}" ]]; then
-		printf "\nBROKEN SYMLINKS:\n$BROKEN_SYMLINKS\n"
+	mapfile -t broken_symlinks < <(sudo find /home -xtype l -print0)
+	if [[ ${broken_symlinks[*]} ]]; then
+		printf "\nBROKEN SYMLINKS:\n$broken_symlinks\n"
 		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			while IFS= read -r -d $'\0'; do 
-				rm "$REPLY"
-			done < <(sudo find /home -xtype l -print0)
+			rm "${broken_symlinks[@]}"
 		fi
-	fi	
+	fi
 }
 
 clean_config() {
