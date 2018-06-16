@@ -36,77 +36,51 @@ upgrade_system() {
 	sudo pacman -Syu
 }
 
-aur_list() {
-	LIST=""
-	while IFS= read -r -d $'\0'; do
-		for D in "$REPLY"/*/; do 
-			if [[ -d "$D" ]]; then
-				LIST="${LIST},${D}"
-			fi
-		done
-	done < <(sudo find /home -name ".aur" -print0)
-
-	echo "${LIST:1}"
-}
-
 rebuild_aur() {
 	# Rebuild AUR packages
-	local AUR_LIST="$(aur_list)"
-	IFS=$',' read -a AUR_LIST <<< "${AUR_LIST}"
-
-	ORIGIN_DIR="$(pwd)"
-	for aur_dir in "${AUR_LIST[@]}"; do
-		cd "$aur_dir"
-		makepkg -sirc
-	done
-	cd "$ORIGIN_DIR"
-}
-
-remove_pacfiles() {
-	# Automatically remove specified pacfiles
-	if [[ -f /etc/pacman.d/mirrorlist.pacnew ]]; then
-		sudo rm /etc/pacman.d/mirrorlist.pacnew
+	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
+		ORIGIN_DIR="$(pwd)"
+		for D in "$AURDEST"/*/; do 
+			if [[ -d "$D" ]]; then
+				cd "$D"
+				makepkg -sirc
+			fi
+		done
+		cd "$ORIGIN_DIR"
 	fi
 }
 
-remove_orphans() {
+remove_orphaned() {
 	# Remove unused orphan packages
-	mapfile -t orphans < <(pacman -Qtdq)
-	if [[ ${orphans[*]} ]]; then
-		printf "\nORPHANED PACKAGES:\n$orphans\n"
+	mapfile -t orphaned < <(pacman -Qtdq)
+	if [[ ${orphaned[*]} ]]; then
+		printf "\nORPHANED PACKAGES:\n${orphaned[*]}\n"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns "${orphans[@]}"
+			sudo pacman -Rns "${orphaned[*]}"
 		fi
 	fi
 }
 
 remove_dropped() {
 	# Remove dropped packages
-	DROPPED_LIST="$(pacman -Qmq)"
-	if [[ -n "${DROPPED_LIST/[ ]*\n/}" ]]; then
-		local AUR_LIST="$(aur_list)"
-
-		DROPPED_ARRAY=()
-		while IFS=$'\n' read -a DROPPED_ITEM; do
-			DROPPED_ARRAY+=("$DROPPED_ITEM")
-		done <<< "${DROPPED_LIST}"
-
-		AUR_FILTERED=""
-		for DROPPED_ITEM in "${DROPPED_ARRAY[@]}"; do
-			IS_AUR="$(echo "$AUR_LIST" | grep "$DROPPED_ITEM")"
-			if [[ ! -n "${IS_AUR/[ ]*\n/}" ]]; then
-				AUR_FILTERED="${AUR_FILTERED} ${DROPPED_ITEM}"
+	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
+		aur_list=""
+		for D in "$AURDEST"/*/; do 
+			if [[ -d "$D" ]]; then
+				aur_list="$aur_list|$(basename "$D")"
 			fi
 		done
-		AUR_FILTERED="${AUR_FILTERED:1}"
+		mapfile -t dropped < <(awk "!/${aur_list:1}/" <(pacman -Qmq))
+	else
+		mapfile -t dropped < <(pacman -Qmq)
+	fi
 
-		if [[ -n "${AUR_FILTERED/[ ]*\n/}" ]]; then
-			printf "\nDROPPED PACKAGES:\n$AUR_FILTERED\n"
-			read -r -p "Do you want to remove the above dropped packages? [y/N]"
-			if [[ "$REPLY" == "y" ]]; then
-				sudo pacman -Rns "$AUR_FILTERED"
-			fi
+	if [[ ${dropped[*]} ]]; then
+		printf "\nDROPPED PACKAGES:\n${dropped[*]}\n"
+		read -r -p "Do you want to remove the above dropped packages? [y/N]"
+		if [[ "$REPLY" == "y" ]]; then
+			sudo pacman -Rns "${dropped[*]}"
 		fi
 	fi
 }
@@ -144,10 +118,10 @@ clean_symlinks() {
 	# Remove broken symlinks
 	mapfile -t broken_symlinks < <(sudo find /home -xtype l -print0)
 	if [[ ${broken_symlinks[*]} ]]; then
-		printf "\nBROKEN SYMLINKS:\n$broken_symlinks\n"
+		printf "\nBROKEN SYMLINKS:\n${broken_symlinks[*]}\n"
 		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			rm "${broken_symlinks[@]}"
+			rm "${broken_symlinks[*]}"
 		fi
 	fi
 }
@@ -175,9 +149,8 @@ system_upgrade() {
 	update_mirrorlist
 	upgrade_system
 	rebuild_aur
-	remove_orphans
+	remove_orphaned
 	remove_dropped
-	remove_pacfiles
 	notify_actions
 }
 
