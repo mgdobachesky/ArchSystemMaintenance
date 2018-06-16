@@ -116,7 +116,7 @@ clean_cache() {
 
 clean_symlinks() {
 	# Remove broken symlinks
-	mapfile -t broken_symlinks < <(sudo find /home -xtype l -print0)
+	mapfile -t broken_symlinks < <(sudo find $HOME -xtype l -print0)
 	if [[ ${broken_symlinks[*]} ]]; then
 		printf "\nBROKEN SYMLINKS:\n${broken_symlinks[*]}\n"
 		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
@@ -135,7 +135,7 @@ remove_lint() {
 	# Run rmlint for further system cleaning
 	read -r -p "Do you want to run rmlint? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
-		rmlint /home
+		rmlint $HOME
 		sed -i -r "s/^handle_emptydir.*(Desktop|Documents|Downloads|Music|Pictures|Public|Templates|Videos).*//" rmlint.sh
 		./rmlint.sh -x
 		rm rmlint.sh
