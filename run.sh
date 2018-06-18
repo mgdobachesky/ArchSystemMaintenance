@@ -110,7 +110,7 @@ notify_actions() {
 }
 
 clean_cache() {
-	# Remove all packages from cache that are not currently installed
+	# Remove all cached packages that are not currently installed and the unused sync database
 	sudo pacman -Sc
 }
 
