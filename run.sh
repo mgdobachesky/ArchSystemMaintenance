@@ -88,10 +88,7 @@ remove_dropped() {
 upgrade_alerts() {
 	# Get any alerts that might have occured while upgrading the system
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
-	warnings="$(awk "/$last_upgrade.*(WARNING|warning)/" /var/log/pacman.log)"
-	if [[ -n "${warnings/[ ]*\n/}" ]]; then
-		printf "\nWARNINGS:\n$warnings\n"
-	fi
+	paclog --after="$last_upgrade" | paclog --warnings
 }
 
 find_pacfiles() {
