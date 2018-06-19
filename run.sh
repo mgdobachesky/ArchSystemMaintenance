@@ -85,26 +85,23 @@ remove_dropped() {
 	fi
 }
 
+handle_pacfiles() {
+	# Find and act on any .pacnew or .pacsave files
+	sudo pacdiff
+}
+
 upgrade_warnings() {
 	# Get any warnings that might have occured while upgrading the system
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 	paclog --after="$last_upgrade" | paclog --warnings
 }
 
-find_pacfiles() {
-	# Find and act on any .pacnew or .pacsave files
-	sudo pacdiff
-}
-
-notify_actions() {
-	# Notify of anything worth mentioning
-	upgrade_warnings
-	find_pacfiles
-}
-
 clean_cache() {
-	# Remove all cached packages that are not currently installed and the unused sync database
-	sudo pacman -Sc
+	# Clean up the package cache
+	read -r -p "Do you want to clean up the package cache? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		sudo paccache -r
+	fi
 }
 
 clean_symlinks() {
@@ -145,6 +142,8 @@ system_upgrade() {
 	remove_orphaned
 	remove_dropped
 	notify_actions
+	handle_pacfiles
+	upgrade_warnings
 }
 
 system_clean() {
