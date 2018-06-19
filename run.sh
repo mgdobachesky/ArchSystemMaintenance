@@ -88,7 +88,7 @@ remove_dropped() {
 upgrade_alerts() {
 	# Get any alerts that might have occured while upgrading the system
 	last_upgrade="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
-	warnings="$(cat /var/log/pacman.log | grep -i "$last_upgrade.*WARNING")"
+	warnings="$(awk "/$last_upgrade.*(WARNING|warning)/" /var/log/pacman.log)"
 	if [[ -n "${warnings/[ ]*\n/}" ]]; then
 		printf "\nWARNINGS:\n$warnings\n"
 	fi
