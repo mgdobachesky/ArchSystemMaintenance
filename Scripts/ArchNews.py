@@ -20,17 +20,17 @@ def upgrade_alerts(last_upgrade = False):
 
     arch_news = xmltodict.parse(data)
 
-    alerts = 0
+    exit_code = 0
     for news_post in arch_news['rss']['channel']['item']:
         if last_upgrade == False or parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
-            alerts = 1
+            exit_code = 1
             print('~' * 75)
             print("TITLE: ", news_post['title'])
             print("DATE: ", news_post['pubDate'])
             print("DESCRIPTION: ", clean_html(news_post['description']))
             print("\n")
     
-    return alerts
+    return exit_code
 
 
 if __name__ == '__main__':
