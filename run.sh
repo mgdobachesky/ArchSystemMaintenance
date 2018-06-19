@@ -93,11 +93,7 @@ upgrade_warnings() {
 
 find_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
-	sudo updatedb
-	pacfiles="$(locate --existing --regex "\.pac(new|save)$")"
-	if [[ -n "${pacfiles/[ ]*\n/}" ]]; then
-		printf "\nPACFILES:\n$pacfiles\n"
-	fi
+	sudo pacdiff
 }
 
 notify_actions() {
