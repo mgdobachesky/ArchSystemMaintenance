@@ -2,12 +2,12 @@
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
-	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
+	last_upgrade="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
 
-	python ./Scripts/ArchNews.py "$LAST_UPGRADE"
-	ALERTS="$?"
+	python ./Scripts/ArchNews.py "$last_upgrade"
+	alerts="$?"
 	
-	if [[ "$ALERTS" == 1 ]]; then
+	if [[ "$alerts" == 1 ]]; then
 		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention."
 		printf "\nContinue only after fully resolving the above issue(s).\n\n"
 
@@ -39,14 +39,14 @@ upgrade_system() {
 rebuild_aur() {
 	# Rebuild AUR packages
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
-		ORIGIN_DIR="$(pwd)"
-		for D in "$AURDEST"/*/; do 
-			if [[ -d "$D" ]]; then
-				cd "$D"
+		starting_dir="$(pwd)"
+		for aur_dir in "$AURDEST"/*/; do 
+			if [[ -d "$aur_dir" ]]; then
+				cd "$aur_dir"
 				makepkg -sirc
 			fi
 		done
-		cd "$ORIGIN_DIR"
+		cd "$starting_dir"
 	fi
 }
 
@@ -66,9 +66,9 @@ remove_dropped() {
 	# Remove dropped packages
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
 		aur_list=""
-		for D in "$AURDEST"/*/; do 
-			if [[ -d "$D" ]]; then
-				aur_list="$aur_list|$(basename "$D")"
+		for aur_dir in "$AURDEST"/*/; do 
+			if [[ -d "$aur_dir" ]]; then
+				aur_list="$aur_list|$(basename "$aur_dir")"
 			fi
 		done
 		mapfile -t dropped < <(awk "!/${aur_list:1}/" <(pacman -Qmq))
@@ -87,19 +87,19 @@ remove_dropped() {
 
 upgrade_alerts() {
 	# Get any alerts that might have occured while upgrading the system
-	LAST_UPGRADE="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
-	WARNINGS="$(cat /var/log/pacman.log | grep -i "$LAST_UPGRADE.*WARNING")"
-	if [[ -n "${WARNINGS/[ ]*\n/}" ]]; then
-		printf "\nWARNINGS:\n$WARNINGS\n"
+	last_upgrade="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
+	warnings="$(cat /var/log/pacman.log | grep -i "$last_upgrade.*WARNING")"
+	if [[ -n "${warnings/[ ]*\n/}" ]]; then
+		printf "\nWARNINGS:\n$warnings\n"
 	fi
 }
 
 find_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
 	sudo updatedb
-	PACFILES="$(locate --existing --regex "\.pac(new|save)$")"
-	if [[ -n "${PACFILES/[ ]*\n/}" ]]; then
-		printf "\nPACFILES:\n$PACFILES\n"
+	pacfiles="$(locate --existing --regex "\.pac(new|save)$")"
+	if [[ -n "${pacfiles/[ ]*\n/}" ]]; then
+		printf "\nPACFILES:\n$pacfiles\n"
 	fi
 }
 
