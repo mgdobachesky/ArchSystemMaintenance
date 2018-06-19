@@ -2,7 +2,7 @@
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
-	last_upgrade="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
+	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
 	python ./Scripts/ArchNews.py "$last_upgrade"
 	alerts="$?"
@@ -87,7 +87,7 @@ remove_dropped() {
 
 upgrade_alerts() {
 	# Get any alerts that might have occured while upgrading the system
-	last_upgrade="$(cat /var/log/pacman.log | grep -Po "(\d{4}-\d{2}-\d{2})(?=.*pacman -Syu)" | tail -1)"
+	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 	warnings="$(awk "/$last_upgrade.*(WARNING|warning)/" /var/log/pacman.log)"
 	if [[ -n "${warnings/[ ]*\n/}" ]]; then
 		printf "\nWARNINGS:\n$warnings\n"
