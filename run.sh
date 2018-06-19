@@ -141,7 +141,6 @@ system_upgrade() {
 	rebuild_aur
 	remove_orphaned
 	remove_dropped
-	notify_actions
 	handle_pacfiles
 	upgrade_warnings
 }
