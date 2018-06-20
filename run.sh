@@ -1,5 +1,10 @@
 #!/bin/bash
 
+arch_news() {
+	# Grab the latest Arch Linux news
+	python ./Scripts/ArchNews.py | less
+}
+
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
@@ -16,11 +21,6 @@ fetch_warnings() {
 			exit
 		fi
 	fi
-}
-
-arch_news() {
-	# Grab the latest Arch Linux news
-	python ./Scripts/ArchNews.py | less
 }
 
 update_mirrorlist() {
@@ -133,6 +133,23 @@ remove_lint() {
 	fi
 }
 
+failed_services() {
+	# Check if any systemd services have failed
+	printf "\nFAILED SYSTEMD SERVICES:\n"
+	systemctl --failed
+}
+
+journal_errors() {
+	# Look for high priority errors in the systemd journal
+	printf "\nHIGH PRIORITY SYSTEMD JOURNAL ERRORS:\n"
+	journalctl -p 3 -xb
+}
+
+fetch_news() {
+	# Get latest news
+	arch_news
+}
+
 system_upgrade() {
 	# Upgrade the System
 	fetch_warnings
@@ -153,19 +170,21 @@ system_clean() {
 	remove_lint
 }
 
-fetch_news() {
-	# Get latest news
-	arch_news
+system_errors() {
+	# Check the system for errors
+	failed_services
+	journal_errors
 }
 
 # Take appropriate action
 PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade the System" "Clean the Filesystem" "Exit"; do
+select opt in "Arch Linux News" "Upgrade the System" "Clean the Filesystem" "Check for Errors" "Exit"; do
     case $REPLY in
         1) fetch_news;;
         2) system_upgrade;;
         3) system_clean;;
-        4) break;;
+		4) system_errors;;
+        5) break;;
         *) echo "Please choose an existing option";;
     esac
 done
