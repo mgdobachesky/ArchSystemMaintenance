@@ -57,7 +57,7 @@ remove_orphaned() {
 		printf "\nORPHANED PACKAGES:\n${orphaned[*]}\n"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns "${orphaned[*]}"
+			sudo pacman -Rns --noconfirm "${orphaned[*]}"
 		fi
 	fi
 }
@@ -80,7 +80,7 @@ remove_dropped() {
 		printf "\nDROPPED PACKAGES:\n${dropped[*]}\n"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns "${dropped[*]}"
+			sudo pacman -Rns --noconfirm "${dropped[*]}"
 		fi
 	fi
 }
