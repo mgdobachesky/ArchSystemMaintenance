@@ -65,7 +65,9 @@ remove_orphaned() {
 remove_dropped() {
 	# Remove dropped packages
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
-		aur_list=""
+		# TEMP: Add ArchSystemMaintenance to aur_list
+		aur_list="|ArchSystemMaintenance"
+		#aur_list=""
 		for aur_dir in "$AURDEST"/*/; do 
 			if [[ -d "$aur_dir" ]]; then
 				aur_list="$aur_list|$(basename "$aur_dir")"
