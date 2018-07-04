@@ -2,14 +2,14 @@
 
 arch_news() {
 	# Grab the latest Arch Linux news
-	python ./Scripts/ArchNews.py | less
+	python {{PKG_PATH}}/Scripts/ArchNews.py | less
 }
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
-	python ./Scripts/ArchNews.py "$last_upgrade"
+	python {{PKG_PATH}}/Scripts/ArchNews.py "$last_upgrade"
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
@@ -118,7 +118,7 @@ clean_symlinks() {
 
 clean_config() {
 	# Clean up old configuration files
-	python ./Scripts/rmjunk.py
+	python {{PKG_PATH}}/Scripts/rmjunk.py
 }
 
 remove_lint() {
