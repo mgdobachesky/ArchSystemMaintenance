@@ -66,7 +66,7 @@ remove_dropped() {
 	# Remove dropped packages
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
 		# TEMP: Add ArchSystemMaintenance to aur_list
-		aur_list="|ArchSystemMaintenance"
+		aur_list="|maint"
 		#aur_list=""
 		for aur_dir in "$AURDEST"/*/; do 
 			if [[ -d "$aur_dir" ]]; then
