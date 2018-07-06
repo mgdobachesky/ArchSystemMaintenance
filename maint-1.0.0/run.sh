@@ -65,15 +65,13 @@ remove_orphaned() {
 remove_dropped() {
 	# Remove dropped packages
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
-		# TEMP: Add ArchSystemMaintenance to aur_list
-		aur_list="|maint"
-		#aur_list=""
+		aur_list="maint"
 		for aur_dir in "$AURDEST"/*/; do 
 			if [[ -d "$aur_dir" ]]; then
 				aur_list="$aur_list|$(basename "$aur_dir")"
 			fi
 		done
-		mapfile -t dropped < <(awk "!/${aur_list:1}/" <(pacman -Qmq))
+		mapfile -t dropped < <(awk "!/${aur_list}/" <(pacman -Qmq))
 	else
 		mapfile -t dropped < <(pacman -Qmq)
 	fi
