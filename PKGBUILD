@@ -26,16 +26,22 @@ md5sums=('SKIP'
          'SKIP')
 
 install_dir="opt/$pkgname"
-symlink_dir="usr/local/bin"
+symlink_dir="usr/bin"
+
+build() {
+    umask 022
+    mkdir -p "$srcdir/$install_dir/Scripts"
+    mkdir -p "$srcdir/$symlink_dir"
+
+    sed -i "s|{{PKG_PATH}}|/${install_dir}|" "$srcdir/run.sh"
+
+    install -m 755 "$srcdir/run.sh" $install_dir
+    install -m 755 "$srcdir/ArchNews.py" "$install_dir/Scripts"
+    install -m 755 "$srcdir/rmjunk.py" "$install_dir/Scripts"
+}
 
 package() {
-    mkdir -p "$pkgdir/$install_dir"
-    mkdir -p "$pkgdir/$symlink_dir"
-    
-    sed -i "s|{{PKG_PATH}}|/${install_dir}|" "$srcdir/run.sh"
-    cp "$srcdir/run.sh" "$pkgdir/$install_dir"
-    cp "$srcdir/ArchNews.py" "$pkgdir/$install_dir"
-    cp "$srcdir/rmjunk.py" "$pkgdir/$install_dir"
-
+    cp -r "$srcdir/opt" "$pkgdir"
+    cp -r "$srcdir/usr" "$pkgdir"
     ln -s "/$install_dir/run.sh" "$pkgdir/$symlink_dir/$pkgname"
 }
