@@ -20,7 +20,7 @@ depends=('python'
 source=("https://gitlab.com/mgdobachesky/ArchSystemMaintenance/raw/master/$pkgname-$pkgver/run.sh"
         "https://gitlab.com/mgdobachesky/ArchSystemMaintenance/raw/master/$pkgname-$pkgver/Scripts/ArchNews.py")
 
-md5sums=('c6132824466b769e8fe324b98cd2c1fb'
+md5sums=('f7b5531d8a57c300945fb0c56fc7bd07'
          'af05a3013904f4e47822164bfece1e3e')
 
 install_dir="opt/$pkgname"
