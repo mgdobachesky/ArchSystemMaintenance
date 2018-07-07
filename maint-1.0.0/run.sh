@@ -116,11 +116,6 @@ clean_symlinks() {
 	fi
 }
 
-clean_config() {
-	# Clean up old configuration files
-	python {{PKG_PATH}}/Scripts/rmjunk.py
-}
-
 remove_lint() {
 	# Run rmlint for further system cleaning
 	read -r -p "Do you want to run rmlint? [y/N]"
@@ -166,7 +161,6 @@ system_clean() {
 	# Clean the filesystem
 	clean_cache
 	clean_symlinks
-	clean_config
 	remove_lint
 }
 
