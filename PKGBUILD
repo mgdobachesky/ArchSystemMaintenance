@@ -21,9 +21,9 @@ source=("https://gitlab.com/mgdobachesky/ArchSystemMaintenance/raw/master/$pkgna
         "https://gitlab.com/mgdobachesky/ArchSystemMaintenance/raw/master/$pkgname-$pkgver/Scripts/ArchNews.py"
         "https://gitlab.com/mgdobachesky/ArchSystemMaintenance/raw/master/$pkgname-$pkgver/Scripts/rmjunk.py")
 
-md5sums=('SKIP'
-         'SKIP'
-         'SKIP')
+md5sums=('c6132824466b769e8fe324b98cd2c1fb'
+         'af05a3013904f4e47822164bfece1e3e'
+         '573144e71b0019b795161a9d2c55aa1c')
 
 install_dir="opt/$pkgname"
 symlink_dir="usr/bin"
@@ -41,7 +41,10 @@ build() {
 }
 
 package() {
-    cp -r "$srcdir/opt" "$pkgdir"
-    cp -r "$srcdir/usr" "$pkgdir"
+    install_base=$(echo "$install_dir" | cut -d '/' -f 1)
+    symlink_base=$(echo "$symlink_dir" | cut -d '/' -f 1)
+
+    cp -r "$srcdir/$install_base" "$pkgdir"
+    cp -r "$srcdir/$symlink_base" "$pkgdir"
     ln -s "/$install_dir/run.sh" "$pkgdir/$symlink_dir/$pkgname"
 }
