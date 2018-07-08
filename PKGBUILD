@@ -1,4 +1,4 @@
-# Maintainer: Michael Dobachesky <mgdobachesky@gmail.com>
+# Maintainer: Michael Dobachesky <mgdobachesky@outlook.com>
 
 pkgname=maint
 pkgver=1.0.0
