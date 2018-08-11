@@ -2,14 +2,14 @@
 
 arch_news() {
 	# Grab the latest Arch Linux news
-	python ./archNews.py | less
+	python {{PKG_PATH}}/archNews.py | less
 }
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
-	python ./archNews.py "$last_upgrade"
+	python {{PKG_PATH}}/archNews.py "$last_upgrade"
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
@@ -171,7 +171,7 @@ update_settings() {
 }
 
 # Import settings
-source ./settings.sh
+source {{PKG_PATH}}/settings.sh
 
 # Take appropriate action
 PS3='Action to take: '
