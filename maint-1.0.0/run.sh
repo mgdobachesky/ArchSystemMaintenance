@@ -167,7 +167,7 @@ system_errors() {
 }
 
 update_settings() {
-	sudo vim settings.sh
+	sudo vim {{PKG_PATH}}/settings.sh
 }
 
 # Import settings
