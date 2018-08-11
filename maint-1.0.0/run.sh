@@ -2,14 +2,14 @@
 
 arch_news() {
 	# Grab the latest Arch Linux news
-	python {{PKG_PATH}}/Scripts/ArchNews.py | less
+	python ./archNews.py | less
 }
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
-	python {{PKG_PATH}}/Scripts/ArchNews.py "$last_upgrade"
+	python ./archNews.py "$last_upgrade"
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
@@ -27,7 +27,7 @@ update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	read -r -p "Do you want to get an updated mirrorlist? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
-		sudo reflector --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+		sudo reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 	fi
 }
 
@@ -104,28 +104,25 @@ clean_cache() {
 	fi
 }
 
-clean_symlinks() {
-	# Remove broken symlinks
-	mapfile -t broken_symlinks < <(sudo find $HOME -xtype l -print0)
+clean_symlinks_dir() {
+	# Remove broken symlinks in a specific directory
+	mapfile -t broken_symlinks < <(sudo find $1 -xtype l -print0)
 	if [[ ${broken_symlinks[*]} ]]; then
 		printf "\nBROKEN SYMLINKS:\n${broken_symlinks[*]}\n"
-		read -r -p "Do you want to remove the above broken symlinks? [y/N]"
+		read -r -p "Do you want to remove the broken $1 symlinks above? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
 			rm "${broken_symlinks[*]}"
 		fi
 	fi
 }
 
-remove_lint() {
-	# Run rmlint for further system cleaning
-	read -r -p "Do you want to run rmlint? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
-		rmlint $HOME
-		sed -i -r "s/^handle_emptydir.*(Desktop|Documents|Downloads|Music|Pictures|Public|Templates|Videos).*//" rmlint.sh
-		./rmlint.sh -x
-		rm rmlint.sh
-		rm rmlint.json
-	fi
+clean_symlinks() {
+	# Check for broken symlinks in specified directories
+	for sym_dir in "${SYMLINKS_CHECK[@]}"; do 
+		if [[ -d "$sym_dir" ]]; then
+			clean_symlinks_dir "$sym_dir"
+		fi
+	done
 }
 
 failed_services() {
@@ -161,7 +158,6 @@ system_clean() {
 	# Clean the filesystem
 	clean_cache
 	clean_symlinks
-	remove_lint
 }
 
 system_errors() {
@@ -170,15 +166,23 @@ system_errors() {
 	journal_errors
 }
 
+update_settings() {
+	sudo vim settings.sh
+}
+
+# Import settings
+source ./settings.sh
+
 # Take appropriate action
 PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade the System" "Clean the Filesystem" "Check for Errors" "Exit"; do
+select opt in "Arch Linux News" "Upgrade the System" "Clean the Filesystem" "Check for Errors" "Update Settings" "Exit"; do
     case $REPLY in
         1) fetch_news;;
         2) system_upgrade;;
         3) system_clean;;
 		4) system_errors;;
-        5) break;;
+		5) update_settings;;
+        6) break;;
         *) echo "Please choose an existing option";;
     esac
 done
