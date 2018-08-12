@@ -111,7 +111,7 @@ clean_symlinks_dir() {
 		printf "\nBROKEN SYMLINKS:\n${broken_symlinks[*]}\n"
 		read -r -p "Do you want to remove the broken $1 symlinks above? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			rm "${broken_symlinks[*]}"
+			sudo rm "${broken_symlinks[*]}"
 		fi
 	fi
 }
