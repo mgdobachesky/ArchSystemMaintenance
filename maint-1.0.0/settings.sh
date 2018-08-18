@@ -13,4 +13,3 @@ export SYMLINKS_CHECK=("/bin"
                        "/opt"
                        "/srv"
                        "/usr")
-                       
