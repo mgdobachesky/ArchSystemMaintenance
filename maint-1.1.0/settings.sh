@@ -13,4 +13,13 @@ export SYMLINKS_CHECK=("/bin"
                        "/opt"
                        "/srv"
                        "/usr")
-                       
+
+# Directories to exclude from backup
+export BACKUP_EXCLUDE=("/dev"
+                       "/proc"
+                       "/sys"
+                       "/tmp"
+                       "/run"
+                       "/mnt"
+                       "/media"
+                       "/lost+found")
