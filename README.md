@@ -7,8 +7,9 @@ makepkg -sirc
 maint
 
 ### Options:
-1. Arch Linux News
-2. Upgrade the System
-3. Clean the Filesystem
-4. Check for Errors
-5. Exit
+1) Arch Linux News
+2) Upgrade System
+3) Clean Filesystem
+4) System Error Check
+5) Update Settings
+6) Exit
