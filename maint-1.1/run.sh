@@ -54,10 +54,11 @@ remove_orphaned() {
 	# Remove unused orphan packages
 	mapfile -t orphaned < <(pacman -Qtdq)
 	if [[ ${orphaned[*]} ]]; then
-		printf "\nORPHANED PACKAGES:\n${orphaned[*]}\n"
+		printf "\nORPHANED PACKAGES:\n"
+		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns --noconfirm "${orphaned[*]}"
+			printf '%s' "-Rns --noconfirm ${orphaned[*]}" | sudo xargs pacman
 		fi
 	fi
 }
@@ -77,10 +78,11 @@ remove_dropped() {
 	fi
 
 	if [[ ${dropped[*]} ]]; then
-		printf "\nDROPPED PACKAGES:\n${dropped[*]}\n"
+		printf "\nDROPPED PACKAGES:\n"
+		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns --noconfirm "${dropped[*]}"
+			printf '%s' "-Rns --noconfirm ${dropped[*]}" | sudo xargs pacman
 		fi
 	fi
 }
@@ -104,25 +106,17 @@ clean_cache() {
 	fi
 }
 
-clean_symlinks_dir() {
-	# Remove broken symlinks in a specific directory
-	mapfile -t broken_symlinks < <(sudo find $1 -xtype l -print0)
-	if [[ ${broken_symlinks[*]} ]]; then
-		printf "\nBROKEN SYMLINKS:\n${broken_symlinks[*]}\n"
-		read -r -p "Do you want to remove the broken $1 symlinks above? [y/N]"
-		if [[ "$REPLY" == "y" ]]; then
-			sudo rm "${broken_symlinks[*]}"
-		fi
-	fi
-}
-
 clean_symlinks() {
 	# Check for broken symlinks in specified directories
-	for sym_dir in "${SYMLINKS_CHECK[@]}"; do 
-		if [[ -d "$sym_dir" ]]; then
-			clean_symlinks_dir "$sym_dir"
+	mapfile -t broken_symlinks < <(echo "$(printf '%s ' "${SYMLINKS_CHECK[*]}")-xtype l -print" | sudo xargs find)
+	if [[ ${broken_symlinks[*]} ]]; then
+		printf "\nBROKEN SYMLINKS:\n"
+		printf '%s\n' "${broken_symlinks[@]}"
+		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
+		if [[ "$REPLY" == "y" ]]; then
+			printf '%s' "${broken_symlinks[*]}" | sudo xargs rm
 		fi
-	done
+	fi
 }
 
 failed_services() {
@@ -161,15 +155,10 @@ system_clean() {
 }
 
 backup_system() {
-	source ./settings.sh
 	# Backup the system
-	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/ --exclude }")
-	#excludes="$(printf '%s' "${BACKUP_EXCLUDE[@]}")"
-	BACKUP_EXCLUDE="${BACKUP_EXCLUDE:1}"
-	sudo duplicity "${BACKUP_EXCLUDE[@]}" / "file://$BACKUP_SAVE"
-
-	printf "\nBACKUP FINISHED AND SAVED TO: $BACKUP_SAVE\n"
-
+	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
+	echo "$(printf '%s ' "${BACKUP_EXCLUDE[*]}")/ file://$BACKUP_SAVE" | sudo xargs duplicity
+	printf "BACKUP FINISHED AND SAVED TO: $BACKUP_SAVE\n"
 }
 
 system_errors() {
