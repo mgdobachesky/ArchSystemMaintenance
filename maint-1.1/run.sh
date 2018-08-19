@@ -154,17 +154,17 @@ system_clean() {
 	clean_symlinks
 }
 
+system_errors() {
+	# Check the system for errors
+	failed_services
+	journal_errors
+}
+
 backup_system() {
 	# Backup the system
 	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
 	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
 	printf "BACKUP FINISHED AND SAVED TO: $BACKUP_SAVE\n"
-}
-
-system_errors() {
-	# Check the system for errors
-	failed_services
-	journal_errors
 }
 
 update_settings() {
@@ -176,13 +176,13 @@ source {{PKG_PATH}}/settings.sh
 
 # Take appropriate action
 PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "Backup System" "System Error Check" "Update Settings" "Exit"; do
+select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Update Settings" "Exit"; do
     case $REPLY in
         1) fetch_news;;
         2) system_upgrade;;
         3) system_clean;;
-		4) backup_system;;
-		5) system_errors;;
+		4) system_errors;;
+		5) backup_system;;
 		6) update_settings;;
         7) break;;
         *) echo "Please choose an existing option";;
