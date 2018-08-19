@@ -2,9 +2,9 @@
 [AUR maint package](https://aur.archlinux.org/packages/maint/)
 
 ## Installation
-git clone https&#58;//aur.archlinux.org/maint.git
-cd maint
-makepkg -sirc
+- git clone https://aur.archlinux.org/maint.git
+- cd maint
+- makepkg -sirc
 
 ### Setup:
 1. Update settings to reflect the country you want your mirrorlists to be generated in. (Default is United States)
