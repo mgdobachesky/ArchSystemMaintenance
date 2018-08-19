@@ -2,7 +2,7 @@
 [AUR maint package](https://aur.archlinux.org/packages/maint/)
 
 ## Installation
-git clone https://aur.archlinux.org/maint.git <br />
+git clone https://<span></span>aur.archlinux.org/maint.git <br />
 cd maint <br />
 makepkg -sirc
 
