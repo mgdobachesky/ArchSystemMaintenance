@@ -58,7 +58,7 @@ remove_orphaned() {
 		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			printf '%s' "-Rns --noconfirm ${orphaned[*]}" | sudo xargs pacman
+			sudo pacman -Rns --noconfirm ${orphaned[*]}
 		fi
 	fi
 }
@@ -82,7 +82,7 @@ remove_dropped() {
 		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			printf '%s' "-Rns --noconfirm ${dropped[*]}" | sudo xargs pacman
+			sudo pacman -Rns --noconfirm ${dropped[*]}
 		fi
 	fi
 }
@@ -108,13 +108,13 @@ clean_cache() {
 
 clean_symlinks() {
 	# Check for broken symlinks in specified directories
-	mapfile -t broken_symlinks < <(echo "$(printf '%s ' "${SYMLINKS_CHECK[*]}")-xtype l -print" | sudo xargs find)
+	mapfile -t broken_symlinks < <(sudo find ${SYMLINKS_CHECK[*]} -xtype l -print)
 	if [[ ${broken_symlinks[*]} ]]; then
 		printf "\nBROKEN SYMLINKS:\n"
 		printf '%s\n' "${broken_symlinks[@]}"
 		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			printf '%s' "${broken_symlinks[*]}" | sudo xargs rm
+			sudo rm ${broken_symlinks[*]}
 		fi
 	fi
 }
@@ -157,7 +157,7 @@ system_clean() {
 backup_system() {
 	# Backup the system
 	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
-	echo "$(printf '%s ' "${BACKUP_EXCLUDE[*]}")/ file://$BACKUP_SAVE" | sudo xargs duplicity
+	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
 	printf "BACKUP FINISHED AND SAVED TO: $BACKUP_SAVE\n"
 }
 
