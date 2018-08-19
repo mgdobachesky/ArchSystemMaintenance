@@ -14,6 +14,9 @@ export SYMLINKS_CHECK=("/bin"
                        "/srv"
                        "/usr")
 
+# Where to save the system backup
+export BACKUP_SAVE="/usr/local/backup"
+
 # Directories to exclude from backup
 export BACKUP_EXCLUDE=("/dev"
                        "/proc"

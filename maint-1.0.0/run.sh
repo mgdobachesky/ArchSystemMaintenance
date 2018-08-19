@@ -175,7 +175,7 @@ source {{PKG_PATH}}/settings.sh
 
 # Take appropriate action
 PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade the System" "Clean the Filesystem" "Check for Errors" "Update Settings" "Exit"; do
+select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Update Settings" "Exit"; do
     case $REPLY in
         1) fetch_news;;
         2) system_upgrade;;
