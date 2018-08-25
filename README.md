@@ -2,14 +2,14 @@
 [AUR maint package](https://aur.archlinux.org/packages/maint/)
 
 ## Installation / Upgrade
-#### Installation
+###### Installation
 git clone https://<span></span>aur.archlinux.org/maint.git <br />
 cd maint <br />
 makepkg -sirc
 
-#### Upgrade
-cd maint
-git pull origin master
+###### Upgrade
+cd maint <br />
+git pull origin master <br />
 makepkg -sirc
 
 ### Setup:
