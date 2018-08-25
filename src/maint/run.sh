@@ -7,6 +7,7 @@ arch_news() {
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
+	printf "\nChecking for posted upgrade issues...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
 	python {{PKG_PATH}}/archNews.py "$last_upgrade"
@@ -27,17 +28,20 @@ update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	read -r -p "Do you want to get an updated mirrorlist? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
+		printf "Updating mirrorlist...\n"
 		sudo reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 	fi
 }
 
 upgrade_system() {
 	# Upgrade the system
+	printf "\nUpgrading the system...\n"
 	sudo pacman -Syu
 }
 
 rebuild_aur() {
 	# Rebuild AUR packages
+	printf "\nRebuilding AUR packages...\n"
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
 		starting_dir="$(pwd)"
 		for aur_dir in "$AURDEST"/*/; do 
@@ -52,6 +56,7 @@ rebuild_aur() {
 
 remove_orphaned() {
 	# Remove unused orphan packages
+	printf "\nChecking for orphaned packages...\n"
 	mapfile -t orphaned < <(pacman -Qtdq)
 	if [[ ${orphaned[*]} ]]; then
 		printf "\nORPHANED PACKAGES:\n"
@@ -65,6 +70,7 @@ remove_orphaned() {
 
 remove_dropped() {
 	# Remove dropped packages
+	printf "\nChecking for dropped packages...\n"
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
 		aur_list="maint"
 		for aur_dir in "$AURDEST"/*/; do 
@@ -89,11 +95,13 @@ remove_dropped() {
 
 handle_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
+	printf "\nChecking for pacfiles...\n"
 	sudo pacdiff
 }
 
 upgrade_warnings() {
 	# Get any warnings that might have occured while upgrading the system
+	printf "\nChecking for upgrade warnings...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 	paclog --after="$last_upgrade" | paclog --warnings
 }
@@ -102,12 +110,14 @@ clean_cache() {
 	# Clean up the package cache
 	read -r -p "Do you want to clean up the package cache? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
+		printf "Cleaning up the package cache...\n"
 		sudo paccache -r
 	fi
 }
 
 clean_symlinks() {
 	# Check for broken symlinks in specified directories
+	printf "\nChecking for broken symlinks...\n"
 	mapfile -t broken_symlinks < <(sudo find ${SYMLINKS_CHECK[*]} -xtype l -print)
 	if [[ ${broken_symlinks[*]} ]]; then
 		printf "\nBROKEN SYMLINKS:\n"
@@ -162,9 +172,10 @@ system_errors() {
 
 backup_system() {
 	# Backup the system
+	printf "\nBacking up the system...\n"
 	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
 	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
-	printf "BACKUP FINISHED AND SAVED TO: $BACKUP_SAVE\n"
+	printf "\nBackup saved to: $BACKUP_SAVE\n"
 }
 
 update_settings() {
@@ -172,7 +183,8 @@ update_settings() {
 }
 
 # Import settings
-source {{PKG_PATH}}/settings.sh
+#source {{PKG_PATH}}/settings.sh
+source ./settings.sh
 
 # Take appropriate action
 PS3='Action to take: '
