@@ -189,7 +189,7 @@ source {{PKG_PATH}}/settings.sh
 # Take appropriate action
 PS3='Action to take: '
 select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Update Settings" "Exit"; do
-    case $REPLY in
+	case $REPLY in
 		1) fetch_news;;
 		2) system_upgrade;;
 		3) system_clean;;
@@ -198,5 +198,5 @@ select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Erro
 		6) update_settings;;
 		7) break;;
 		*) echo "Please choose an existing option";;
-    esac
+	esac
 done
