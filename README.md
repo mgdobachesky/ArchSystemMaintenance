@@ -1,9 +1,15 @@
 # Arch System Maintenance
 [AUR maint package](https://aur.archlinux.org/packages/maint/)
 
-## Installation
+## Installation / Upgrade
+#### Installation
 git clone https://<span></span>aur.archlinux.org/maint.git <br />
 cd maint <br />
+makepkg -sirc
+
+#### Upgrade
+cd maint
+git pull origin master
 makepkg -sirc
 
 ### Setup:
