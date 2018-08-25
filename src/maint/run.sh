@@ -7,15 +7,14 @@ arch_news() {
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
-	printf "\nChecking for posted upgrade issues...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
 	python {{PKG_PATH}}/archNews.py "$last_upgrade"
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
-		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention."
-		printf "\nContinue only after fully resolving the above issue(s).\n\n"
+		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention.\n"
+		printf "Continue only after fully resolving the above issue(s).\n\n"
 
 		read -r -p "Are you ready to continue? [y/N]"
 		if [[ "$REPLY" != "y" ]]; then
@@ -30,18 +29,17 @@ update_mirrorlist() {
 	if [[ "$REPLY" == "y" ]]; then
 		printf "Updating mirrorlist...\n"
 		sudo reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+		printf "...Mirrorlist updated\n\n"
 	fi
 }
 
 upgrade_system() {
 	# Upgrade the system
-	printf "\nUpgrading the system...\n"
 	sudo pacman -Syu
 }
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	printf "\nRebuilding AUR packages...\n"
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
 		starting_dir="$(pwd)"
 		for aur_dir in "$AURDEST"/*/; do 
@@ -59,18 +57,20 @@ remove_orphaned() {
 	printf "\nChecking for orphaned packages...\n"
 	mapfile -t orphaned < <(pacman -Qtdq)
 	if [[ ${orphaned[*]} ]]; then
-		printf "\nORPHANED PACKAGES:\n"
+		printf "...ORPHANED PACKAGES FOUND:\n"
 		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
 			sudo pacman -Rns --noconfirm ${orphaned[*]}
 		fi
+	else 
+		printf "...No orphaned packages found\n\n"
 	fi
 }
 
 remove_dropped() {
 	# Remove dropped packages
-	printf "\nChecking for dropped packages...\n"
+	printf "Checking for dropped packages...\n"
 	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
 		aur_list="maint"
 		for aur_dir in "$AURDEST"/*/; do 
@@ -84,24 +84,24 @@ remove_dropped() {
 	fi
 
 	if [[ ${dropped[*]} ]]; then
-		printf "\nDROPPED PACKAGES:\n"
+		printf "...DROPPED PACKAGES FOUND:\n"
 		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
 			sudo pacman -Rns --noconfirm ${dropped[*]}
 		fi
+	else
+		printf "...No dropped packages found\n\n"
 	fi
 }
 
 handle_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
-	printf "\nChecking for pacfiles...\n"
 	sudo pacdiff
 }
 
 upgrade_warnings() {
 	# Get any warnings that might have occured while upgrading the system
-	printf "\nChecking for upgrade warnings...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 	paclog --after="$last_upgrade" | paclog --warnings
 }
@@ -110,7 +110,6 @@ clean_cache() {
 	# Clean up the package cache
 	read -r -p "Do you want to clean up the package cache? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
-		printf "Cleaning up the package cache...\n"
 		sudo paccache -r
 	fi
 }
@@ -126,6 +125,8 @@ clean_symlinks() {
 		if [[ "$REPLY" == "y" ]]; then
 			sudo rm ${broken_symlinks[*]}
 		fi
+	else
+		printf "...No broken symlinks found\n\n"
 	fi
 }
 
@@ -175,7 +176,7 @@ backup_system() {
 	printf "\nBacking up the system...\n"
 	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
 	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
-	printf "\nBackup saved to: $BACKUP_SAVE\n"
+	printf "...Backup saved to $BACKUP_SAVE\n\n"
 }
 
 update_settings() {
