@@ -183,8 +183,7 @@ update_settings() {
 }
 
 # Import settings
-#source {{PKG_PATH}}/settings.sh
-source ./settings.sh
+source {{PKG_PATH}}/settings.sh
 
 # Take appropriate action
 PS3='Action to take: '
