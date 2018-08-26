@@ -181,6 +181,7 @@ backup_system() {
 
 update_settings() {
 	sudo vim {{PKG_PATH}}/settings.sh
+	source {{PKG_PATH}}/settings.sh
 }
 
 # Import settings
