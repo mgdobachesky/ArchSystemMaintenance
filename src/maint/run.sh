@@ -63,6 +63,7 @@ remove_orphaned() {
 		if [[ "$REPLY" == "y" ]]; then
 			sudo pacman -Rns --noconfirm ${orphaned[*]}
 		fi
+		printf "\n"
 	else 
 		printf "...No orphaned packages found\n\n"
 	fi
@@ -90,6 +91,7 @@ remove_dropped() {
 		if [[ "$REPLY" == "y" ]]; then
 			sudo pacman -Rns --noconfirm ${dropped[*]}
 		fi
+		printf "\n"
 	else
 		printf "...No dropped packages found\n\n"
 	fi
@@ -125,9 +127,19 @@ clean_symlinks() {
 		if [[ "$REPLY" == "y" ]]; then
 			sudo rm ${broken_symlinks[*]}
 		fi
+		printf "\n"
 	else
 		printf "...No broken symlinks found\n\n"
 	fi
+}
+
+clean_old_config() {
+	# Remind the user to clean up old configuration files
+	printf "NOTICE: Check the following directories for old configuration files:\n"
+	printf "~/\n"
+	printf "~/.config/\n"
+	printf "~/.cache/\n"
+	printf "~/.local/share/\n\n"
 }
 
 failed_services() {
@@ -163,6 +175,7 @@ system_clean() {
 	# Clean the filesystem
 	clean_cache
 	clean_symlinks
+	clean_old_config
 }
 
 system_errors() {
