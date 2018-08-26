@@ -1,54 +1,68 @@
 #!/bin/bash
 
+#######################################################################
+########################## Menu Option Logic ##########################
+#######################################################################
+
 arch_news() {
 	# Grab the latest Arch Linux news
-	python {{PKG_PATH}}/archNews.py | less
+	python $(pkg_path)/archNews.py | less
 }
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
+	printf "\nChecking Arch Linux news...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
-	python {{PKG_PATH}}/archNews.py "$last_upgrade"
+	python $(pkg_path)/archNews.py "$last_upgrade"
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
 		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention.\n"
-		printf "Continue only after fully resolving the above issue(s).\n\n"
+		printf "Continue only after fully resolving the above issue(s).\n"
 
+		printf "\n"
 		read -r -p "Are you ready to continue? [y/N]"
 		if [[ "$REPLY" != "y" ]]; then
 			exit
+		else
+			printf "...No new Arch Linux news posts\n"
 		fi
 	fi
 }
 
 update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
+	printf "\n"
 	read -r -p "Do you want to get an updated mirrorlist? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
 		printf "Updating mirrorlist...\n"
 		sudo reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
-		printf "...Mirrorlist updated\n\n"
+		printf "...Mirrorlist updated\n"
 	fi
 }
 
 upgrade_system() {
 	# Upgrade the system
+	printf "\nUpgrading the system...\n"
 	sudo pacman -Syu
+	printf "...Done upgrading the system\n"
 }
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
+	printf "\nRebuilding AUR packages...\n"
+	if [[ -d "$AUR_DIR" ]]; then
 		starting_dir="$(pwd)"
-		for aur_dir in "$AURDEST"/*/; do 
-			if [[ -d "$aur_dir" ]]; then
-				cd "$aur_dir"
+		for aur_pkg in "$AUR_DIR"/*/; do 
+			if [[ -d "$aur_pkg" ]]; then
+				cd "$aur_pkg"
 				makepkg -sirc
 			fi
 		done
 		cd "$starting_dir"
+	else
+		printf "...AUR package directory not set up at $AUR_DIR\n"
 	fi
 }
 
@@ -57,26 +71,25 @@ remove_orphaned() {
 	printf "\nChecking for orphaned packages...\n"
 	mapfile -t orphaned < <(pacman -Qtdq)
 	if [[ ${orphaned[*]} ]]; then
-		printf "...ORPHANED PACKAGES FOUND:\n"
+		printf "ORPHANED PACKAGES FOUND:\n"
 		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
 			sudo pacman -Rns --noconfirm ${orphaned[*]}
 		fi
-		printf "\n"
 	else 
-		printf "...No orphaned packages found\n\n"
+		printf "...No orphaned packages found\n"
 	fi
 }
 
 remove_dropped() {
 	# Remove dropped packages
-	printf "Checking for dropped packages...\n"
-	if [[ -n "${AURDEST/[ ]*\n/}" ]]; then
+	printf "\nChecking for dropped packages...\n"
+	if [[ -n "${AUR_DIR/[ ]*\n/}" ]]; then
 		aur_list="maint"
-		for aur_dir in "$AURDEST"/*/; do 
-			if [[ -d "$aur_dir" ]]; then
-				aur_list="$aur_list|$(basename "$aur_dir")"
+		for aur_pkg in "$AUR_DIR"/*/; do 
+			if [[ -d "$aur_pkg" ]]; then
+				aur_list="$aur_list|$(basename "$aur_pkg")"
 			fi
 		done
 		mapfile -t dropped < <(awk "!/${aur_list}/" <(pacman -Qmq))
@@ -85,34 +98,40 @@ remove_dropped() {
 	fi
 
 	if [[ ${dropped[*]} ]]; then
-		printf "...DROPPED PACKAGES FOUND:\n"
+		printf "DROPPED PACKAGES FOUND:\n"
 		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
 			sudo pacman -Rns --noconfirm ${dropped[*]}
 		fi
-		printf "\n"
 	else
-		printf "...No dropped packages found\n\n"
+		printf "...No dropped packages found\n"
 	fi
 }
 
 handle_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
+	printf "\nChecking for pacfiles...\n"
 	sudo pacdiff
+	printf "...Done checking for pacfiles\n"
 }
 
 upgrade_warnings() {
 	# Get any warnings that might have occured while upgrading the system
+	printf "\nChecking for upgrade warnings...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 	paclog --after="$last_upgrade" | paclog --warnings
+	printf "...Done checking for upgrade warnings\n"
 }
 
 clean_cache() {
 	# Clean up the package cache
+	printf "\n"
 	read -r -p "Do you want to clean up the package cache? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
+		printf "Cleaning up the package cache...\n"
 		sudo paccache -r
+		printf "...Done cleaning up the package cache\n"
 	fi
 }
 
@@ -121,25 +140,24 @@ clean_symlinks() {
 	printf "\nChecking for broken symlinks...\n"
 	mapfile -t broken_symlinks < <(sudo find ${SYMLINKS_CHECK[*]} -xtype l -print)
 	if [[ ${broken_symlinks[*]} ]]; then
-		printf "...BROKEN SYMLINKS FOUND:\n"
+		printf "BROKEN SYMLINKS FOUND:\n"
 		printf '%s\n' "${broken_symlinks[@]}"
 		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
 			sudo rm ${broken_symlinks[*]}
 		fi
-		printf "\n"
 	else
-		printf "...No broken symlinks found\n\n"
+		printf "...No broken symlinks found\n"
 	fi
 }
 
 clean_old_config() {
 	# Remind the user to clean up old configuration files
-	printf "NOTICE: Check the following directories for old configuration files:\n"
+	printf "\nNOTICE: Check the following directories for old configuration files:\n"
 	printf "~/\n"
 	printf "~/.config/\n"
 	printf "~/.cache/\n"
-	printf "~/.local/share/\n\n"
+	printf "~/.local/share/\n"
 }
 
 failed_services() {
@@ -154,9 +172,38 @@ journal_errors() {
 	journalctl -p 3 -xb
 }
 
+execute_backup() {
+	# Execute backup operations
+	printf "\nBacking up the system...\n"
+	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
+	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
+	printf "...Done backing up to $BACKUP_SAVE\n"
+}
+
+modify_settings() {
+	# Modify user settings
+	sudo vim $(pkg_path)/settings.sh
+}
+
+source_settings() {
+	# Bring in user settings
+	source $(pkg_path)/settings.sh
+}
+
+pkg_path() {
+	# The package path is set during installation with the PKGBUILD
+	local pkg_path={{PKG_PATH}}
+	echo $pkg_path
+}
+
+#######################################################################
+####################### Menu Option Definitions #######################
+#######################################################################
+
 fetch_news() {
 	# Get latest news
 	arch_news
+	printf "\n"
 }
 
 system_upgrade() {
@@ -169,6 +216,7 @@ system_upgrade() {
 	remove_dropped
 	handle_pacfiles
 	upgrade_warnings
+	printf "\n"
 }
 
 system_clean() {
@@ -176,29 +224,35 @@ system_clean() {
 	clean_cache
 	clean_symlinks
 	clean_old_config
+	printf "\n"
 }
 
 system_errors() {
 	# Check the system for errors
 	failed_services
 	journal_errors
+	printf "\n"
 }
 
 backup_system() {
 	# Backup the system
-	printf "\nBacking up the system...\n"
-	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
-	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
-	printf "...Backup saved to $BACKUP_SAVE\n\n"
+	execute_backup
+	printf "\n"
 }
 
 update_settings() {
-	sudo vim {{PKG_PATH}}/settings.sh
-	source {{PKG_PATH}}/settings.sh
+	# Update user settings
+	modify_settings
+	source_settings
+	printf "\n"
 }
 
+#######################################################################
+############################## Main Menu ##############################
+#######################################################################
+
 # Import settings
-source {{PKG_PATH}}/settings.sh
+source_settings
 
 # Take appropriate action
 PS3='Action to take: '

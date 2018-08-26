@@ -2,7 +2,7 @@
 export MIRRORLIST_COUNTRY='United States'
 
 # Directory where currently installed AUR packages are stored
-export AURDEST="$HOME/.aur"
+export AUR_DIR="$HOME/.aur"
 
 # Directories in which broken symlinks should be searched
 export SYMLINKS_CHECK=("/bin"
