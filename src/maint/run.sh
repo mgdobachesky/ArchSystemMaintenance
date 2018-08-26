@@ -25,9 +25,9 @@ fetch_warnings() {
 		read -r -p "Are you ready to continue? [y/N]"
 		if [[ "$REPLY" != "y" ]]; then
 			exit
-		else
-			printf "...No new Arch Linux news posts\n"
 		fi
+	else
+		printf "...No new Arch Linux news posts\n"
 	fi
 }
 
