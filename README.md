@@ -1,5 +1,4 @@
-# Arch System Maintenance
-[AUR maint package](https://aur.archlinux.org/packages/maint/) <br />
+# [Arch System Maintenance](https://aur.archlinux.org/packages/maint/)
 maint is a package that will automatically take care of various Arch Linux system maintenance tasks. This package makes it easy to follow best practices while upgrading the system because the best practices are directly built in, as follows:
 * Users can easily view the latest Arch Linux News right from the terminal.
 * Users can follow the optimal upgrade steps with a single tap. First, the latest Arch Linux warning are gathered and the user is prompted to deal with any out-of-the-ordinary issues. Next, the user is given the option to update the mirrorlist. After that, the system is upgraded. The next step is to rebuild the user's AUR packages with the newly upgraded system packages. After that, both orphaned and dropped packages are searched for and the user is prompted to remove them. When that is finished, pacfiles are searched for and the user is prompted to deal with them. Finally, any other warnings that came up during the upgrade are output so the user can't miss them.
