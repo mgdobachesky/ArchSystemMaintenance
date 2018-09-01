@@ -34,3 +34,6 @@ maint
 5. Backup System
 6. Update Settings
 7. Exit
+
+##Notes for advanced users
+* If you are building this package from source then you will have to replace {{PKG_PATH}} in the main executable.
