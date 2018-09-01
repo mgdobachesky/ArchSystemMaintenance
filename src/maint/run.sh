@@ -61,6 +61,7 @@ rebuild_aur() {
 			fi
 		done
 		cd "$starting_dir"
+		printf "...Done rebuilding AUR packages\n"
 	else
 		printf "...AUR package directory not set up at $AUR_DIR\n"
 	fi
@@ -174,10 +175,13 @@ journal_errors() {
 
 execute_backup() {
 	# Execute backup operations
-	printf "\nBacking up the system...\n"
-	BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
-	sudo duplicity ${BACKUP_EXCLUDE[*]} / "file://$BACKUP_SAVE"
-	printf "...Done backing up to $BACKUP_SAVE\n"
+	read -r -p "Do you want to backup the system to $BACKUP_SAVE? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		printf "\nBacking up the system...\n"
+		BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
+		sudo duplicity ${BACKUP_EXCLUDE[*]} / "$BACKUP_PROTOCOL://$BACKUP_SAVE"
+		printf "...Done backing up to $BACKUP_SAVE\n"
+	fi
 }
 
 modify_settings() {
