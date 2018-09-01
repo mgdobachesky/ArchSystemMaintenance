@@ -184,6 +184,17 @@ execute_backup() {
 	fi
 }
 
+execute_restore() {
+	# Execute restore operations
+	read -r -p "Do you want to restore the system from the image at $BACKUP_SAVE? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		printf "\nRestoring the system...\n"
+		BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
+		sudo duplicity ${BACKUP_EXCLUDE[*]} "$BACKUP_PROTOCOL://$BACKUP_SAVE" /
+		printf "...Done restoring from $BACKUP_SAVE\n"
+	fi
+}
+
 modify_settings() {
 	# Modify user settings
 	sudo vim $(pkg_path)/settings.sh
@@ -244,6 +255,12 @@ backup_system() {
 	printf "\n"
 }
 
+restore_system() {
+	# Restore the system
+	execute_restore
+	printf "\n"
+}
+
 update_settings() {
 	# Update user settings
 	modify_settings
@@ -260,15 +277,16 @@ source_settings
 
 # Take appropriate action
 PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Update Settings" "Exit"; do
+select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
 	case $REPLY in
 		1) fetch_news;;
 		2) system_upgrade;;
 		3) system_clean;;
 		4) system_errors;;
 		5) backup_system;;
-		6) update_settings;;
-		7) break;;
+		6) restore_system;;
+		7) update_settings;;
+		8) break;;
 		*) echo "Please choose an existing option";;
 	esac
 done
