@@ -1,18 +1,13 @@
 #!/bin/bash
 
-#######################################################################
-######################## System Upgrade Options #######################
-#######################################################################
-
 # Country to generate the mirror list for
 export MIRRORLIST_COUNTRY='United States'
 
 # Directory where currently installed AUR packages are stored
 export AUR_DIR="$HOME/.aur"
 
-#######################################################################
-##################### Filesystem Cleaning Options #####################
-#######################################################################
+# Where to save the system backup
+export BACKUP_LOCATION="/usr/local/backup"
 
 # Directories in which broken symlinks should be searched
 export SYMLINKS_CHECK=("/bin"
@@ -23,23 +18,3 @@ export SYMLINKS_CHECK=("/bin"
                        "/opt"
                        "/srv"
                        "/usr")
-
-#######################################################################
-######################## System Backup Options ########################
-#######################################################################
-
-# Protocol to use while backing up the system
-export BACKUP_PROTOCOL="file"
-
-# Where to save the system backup
-export BACKUP_SAVE="/usr/local/backup"
-
-# Directories to exclude from backup
-export BACKUP_EXCLUDE=("/dev"
-                       "/proc"
-                       "/sys"
-                       "/tmp"
-                       "/run"
-                       "/mnt"
-                       "/media"
-                       "/lost+found")

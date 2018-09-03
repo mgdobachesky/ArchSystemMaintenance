@@ -175,23 +175,25 @@ journal_errors() {
 
 execute_backup() {
 	# Execute backup operations
-	read -r -p "Do you want to backup the system to $BACKUP_SAVE? [y/N]"
+	read -r -p "Do you want to backup the system to an image located at $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
 		printf "\nBacking up the system...\n"
-		BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
-		sudo duplicity ${BACKUP_EXCLUDE[*]} / "$BACKUP_PROTOCOL://$BACKUP_SAVE"
-		printf "...Done backing up to $BACKUP_SAVE\n"
+		sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found"} / "$BACKUP_LOCATION"
+		printf "...Done backing up to $BACKUP_LOCATION\n"
 	fi
 }
 
 execute_restore() {
 	# Execute restore operations
-	read -r -p "Do you want to restore the system from the image at $BACKUP_SAVE? [y/N]"
+	read -r -p "Do you want to restore the system from the image located at $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
-		printf "\nRestoring the system...\n"
-		BACKUP_EXCLUDE=("${BACKUP_EXCLUDE[@]/#/--exclude }")
-		sudo duplicity ${BACKUP_EXCLUDE[*]} "$BACKUP_PROTOCOL://$BACKUP_SAVE" /
-		printf "...Done restoring from $BACKUP_SAVE\n"
+		if [ -n "$(find $BACKUP_LOCATION -maxdepth 0 -type d -not -empty 2>/dev/null)" ]; then
+			printf "\nRestoring the system...\n"
+			sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found"} "$BACKUP_LOCATION" /
+			printf "...Done restoring from $BACKUP_LOCATION\n"
+		else
+			printf "\nYou must create a system backup before restoring the system from it\n"; 
+		fi
 	fi
 }
 
