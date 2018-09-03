@@ -178,7 +178,7 @@ execute_backup() {
 	read -r -p "Do you want to backup the system to an image located at $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
 		printf "\nBacking up the system...\n"
-		sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found"} / "$BACKUP_LOCATION"
+		sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} / "$BACKUP_LOCATION"
 		printf "...Done backing up to $BACKUP_LOCATION\n"
 	fi
 }
@@ -189,7 +189,7 @@ execute_restore() {
 	if [[ "$REPLY" == "y" ]]; then
 		if [ -n "$(find $BACKUP_LOCATION -maxdepth 0 -type d -not -empty 2>/dev/null)" ]; then
 			printf "\nRestoring the system...\n"
-			sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found"} "$BACKUP_LOCATION" /
+			sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else
 			printf "\nYou must create a system backup before restoring the system from it\n"; 
