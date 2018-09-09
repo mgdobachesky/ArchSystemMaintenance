@@ -51,19 +51,23 @@ upgrade_system() {
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	printf "\nRebuilding AUR packages...\n"
-	if [[ -d "$AUR_DIR" ]]; then
-		starting_dir="$(pwd)"
-		for aur_pkg in "$AUR_DIR"/*/; do 
-			if [[ -d "$aur_pkg" ]]; then
-				cd "$aur_pkg"
-				makepkg -sirc
-			fi
-		done
-		cd "$starting_dir"
-		printf "...Done rebuilding AUR packages\n"
-	else
-		printf "...AUR package directory not set up at $AUR_DIR\n"
+	printf "\n"
+	read -r -p "Do you want to rebuild AUR packages? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		printf "Rebuilding AUR packages...\n"
+		if [[ -d "$AUR_DIR" ]]; then
+			starting_dir="$(pwd)"
+			for aur_pkg in "$AUR_DIR"/*/; do 
+				if [[ -d "$aur_pkg" ]]; then
+					cd "$aur_pkg"
+					makepkg -sirc --noconfirm
+				fi
+			done
+			cd "$starting_dir"
+			printf "...Done rebuilding AUR packages\n"
+		else
+			printf "...AUR package directory not set up at $AUR_DIR\n"
+		fi
 	fi
 }
 
