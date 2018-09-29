@@ -37,7 +37,7 @@ update_mirrorlist() {
 	read -r -p "Do you want to get an updated mirrorlist? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
 		printf "Updating mirrorlist...\n"
-		sudo reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
+		reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 		printf "...Mirrorlist updated\n"
 	fi
 }
@@ -45,8 +45,15 @@ update_mirrorlist() {
 upgrade_system() {
 	# Upgrade the system
 	printf "\nUpgrading the system...\n"
-	sudo pacman -Syu
+	pacman -Syu
 	printf "...Done upgrading the system\n"
+}
+
+set_permissions() {
+	chgrp nobody "$1"
+	chmod g+ws "$1"
+	setfacl -m u::rwx,g::rwx "$1"
+	setfacl -d --set u::rwx,g::rwx,o::- "$1"
 }
 
 rebuild_aur() {
@@ -59,8 +66,11 @@ rebuild_aur() {
 			starting_dir="$(pwd)"
 			for aur_pkg in "$AUR_DIR"/*/; do 
 				if [[ -d "$aur_pkg" ]]; then
+					if sudo -u nobody bash -c "[[ ! -w $aur_pkg ]]"; then
+						set_permissions "$aur_pkg"
+					fi
 					cd "$aur_pkg"
-					makepkg -sirc --noconfirm
+					sudo -u nobody makepkg -ic --noconfirm
 				fi
 			done
 			cd "$starting_dir"
@@ -80,7 +90,7 @@ remove_orphaned() {
 		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns --noconfirm ${orphaned[*]}
+			pacman -Rns --noconfirm ${orphaned[*]}
 		fi
 	else 
 		printf "...No orphaned packages found\n"
@@ -107,7 +117,7 @@ remove_dropped() {
 		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo pacman -Rns --noconfirm ${dropped[*]}
+			pacman -Rns --noconfirm ${dropped[*]}
 		fi
 	else
 		printf "...No dropped packages found\n"
@@ -117,7 +127,7 @@ remove_dropped() {
 handle_pacfiles() {
 	# Find and act on any .pacnew or .pacsave files
 	printf "\nChecking for pacfiles...\n"
-	sudo pacdiff
+	pacdiff
 	printf "...Done checking for pacfiles\n"
 }
 
@@ -135,7 +145,7 @@ clean_cache() {
 	read -r -p "Do you want to clean up the package cache? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
 		printf "Cleaning up the package cache...\n"
-		sudo paccache -r
+		paccache -r
 		printf "...Done cleaning up the package cache\n"
 	fi
 }
@@ -143,13 +153,13 @@ clean_cache() {
 clean_symlinks() {
 	# Check for broken symlinks in specified directories
 	printf "\nChecking for broken symlinks...\n"
-	mapfile -t broken_symlinks < <(sudo find ${SYMLINKS_CHECK[*]} -xtype l -print)
+	mapfile -t broken_symlinks < <(find ${SYMLINKS_CHECK[*]} -xtype l -print)
 	if [[ ${broken_symlinks[*]} ]]; then
 		printf "BROKEN SYMLINKS FOUND:\n"
 		printf '%s\n' "${broken_symlinks[@]}"
 		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
 		if [[ "$REPLY" == "y" ]]; then
-			sudo rm ${broken_symlinks[*]}
+			rm ${broken_symlinks[*]}
 		fi
 	else
 		printf "...No broken symlinks found\n"
@@ -158,7 +168,7 @@ clean_symlinks() {
 
 clean_old_config() {
 	# Remind the user to clean up old configuration files
-	printf "\nNOTICE: Check the following directories for old configuration files:\n"
+	printf "\nNOTICE: Check the following directories for old configuration files\n"
 	printf "~/\n"
 	printf "~/.config/\n"
 	printf "~/.cache/\n"
@@ -182,7 +192,7 @@ execute_backup() {
 	read -r -p "Do you want to backup the system to an image located at $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
 		printf "\nBacking up the system...\n"
-		sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} / "$BACKUP_LOCATION"
+		rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} / "$BACKUP_LOCATION"
 		printf "...Done backing up to $BACKUP_LOCATION\n"
 	fi
 }
@@ -193,7 +203,7 @@ execute_restore() {
 	if [[ "$REPLY" == "y" ]]; then
 		if [ -n "$(find $BACKUP_LOCATION -maxdepth 0 -type d -not -empty 2>/dev/null)" ]; then
 			printf "\nRestoring the system...\n"
-			sudo rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION" /
+			rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else
 			printf "\nYou must create a system backup before restoring the system from it\n"; 
@@ -203,7 +213,7 @@ execute_restore() {
 
 modify_settings() {
 	# Modify user settings
-	sudo vim $(pkg_path)/settings.sh
+	vim $(pkg_path)/settings.sh
 }
 
 source_settings() {
@@ -278,21 +288,25 @@ update_settings() {
 ############################## Main Menu ##############################
 #######################################################################
 
-# Import settings
-source_settings
+if [[ "$EUID" -eq 0 ]]; then
+	# Import settings
+	source_settings
 
-# Take appropriate action
-PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
-	case $REPLY in
-		1) fetch_news;;
-		2) system_upgrade;;
-		3) system_clean;;
-		4) system_errors;;
-		5) backup_system;;
-		6) restore_system;;
-		7) update_settings;;
-		8) break;;
-		*) echo "Please choose an existing option";;
-	esac
-done
+	# Take appropriate action
+	PS3='Action to take: '
+	select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
+		case $REPLY in
+			1) fetch_news;;
+			2) system_upgrade;;
+			3) system_clean;;
+			4) system_errors;;
+			5) backup_system;;
+			6) restore_system;;
+			7) update_settings;;
+			8) break;;
+			*) echo "Please choose an existing option";;
+		esac
+	done
+else
+	printf "ERROR: This package must be run with root privileges\n"
+fi
