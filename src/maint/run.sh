@@ -14,7 +14,11 @@ fetch_warnings() {
 	printf "\nChecking Arch Linux news...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
-	python $(pkg_path)/archNews.py "$last_upgrade"
+	if [[ -n "$last_upgrade" ]]; then
+		python $(pkg_path)/archNews.py "$last_upgrade"
+	else
+		python $(pkg_path)/archNews.py
+	fi
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
@@ -125,7 +129,10 @@ upgrade_warnings() {
 	# Get any warnings that might have occured while upgrading the system
 	printf "\nChecking for upgrade warnings...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
-	paclog --after="$last_upgrade" | paclog --warnings
+
+	if [[ -n "$last_upgrade" ]]; then
+		paclog --after="$last_upgrade" | paclog --warnings
+	fi
 	printf "...Done checking for upgrade warnings\n"
 }
 
