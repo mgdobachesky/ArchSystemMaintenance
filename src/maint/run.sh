@@ -53,11 +53,22 @@ upgrade_system() {
 	printf "...Done upgrading the system\n"
 }
 
-set_permissions() {
-	chgrp nobody "$1"
-	chmod g+ws "$1"
-	setfacl -m u::rwx,g::rwx "$1"
-	setfacl -d --set u::rwx,g::rwx,o::- "$1"
+aur_setup() {
+	# Make sure the AUR directory is setup correctly
+	printf "\n"
+	read -r -p "Do you want to setup the AUR package directory at $AUR_DIR? [y/N]"
+	if [[ "$REPLY" == "y" ]]; then
+		printf "Setting up AUR package directory...\n"
+		if [[ ! -d "$AUR_DIR" ]]; then
+			mkdir "$AUR_DIR"
+		fi
+
+		chgrp nobody "$AUR_DIR"
+		chmod g+ws "$AUR_DIR"
+		setfacl -m u::rwx,g::rwx "$AUR_DIR"
+		setfacl -d --set u::rwx,g::rwx,o::- "$AUR_DIR"
+		printf "...AUR package directory set up at $AUR_DIR\n"
+	fi
 }
 
 rebuild_aur() {
@@ -65,22 +76,27 @@ rebuild_aur() {
 	printf "\n"
 	read -r -p "Do you want to rebuild AUR packages? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
-		printf "Rebuilding AUR packages...\n"
-		if [[ -d "$AUR_DIR" ]]; then
-			starting_dir="$(pwd)"
-			for aur_pkg in "$AUR_DIR"/*/; do 
-				if [[ -d "$aur_pkg" ]]; then
-					if sudo -u nobody bash -c "[[ ! -w $aur_pkg ]]"; then
-						set_permissions "$aur_pkg"
+		if sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
+			printf "Rebuilding AUR packages...\n"
+			if [[ -n "$(ls -A $AUR_DIR)" ]]; then
+				starting_dir="$(pwd)"
+				for aur_pkg in "$AUR_DIR"/*/; do 
+					if [[ -d "$aur_pkg" ]]; then
+						cd "$aur_pkg"
+						git pull origin master
+						source PKGBUILD
+						pacman -S --asdeps "${depends[@]}" "${makedepends[@]}" --noconfirm
+						sudo -u nobody makepkg -fc --noconfirm
+						pacman -U "$(sudo -u nobody makepkg --packagelist)" --noconfirm
 					fi
-					cd "$aur_pkg"
-					sudo -u nobody makepkg -ic --noconfirm
-				fi
-			done
-			cd "$starting_dir"
-			printf "...Done rebuilding AUR packages\n"
+				done
+				cd "$starting_dir"
+				printf "...Done rebuilding AUR packages\n"
+			else
+				printf "...No AUR packages in $AUR_DIR\n"
+			fi
 		else
-			printf "...AUR package directory not set up at $AUR_DIR\n"
+			aur_setup
 		fi
 	fi
 }
@@ -295,25 +311,26 @@ update_settings() {
 ############################## Main Menu ##############################
 #######################################################################
 
-if [[ "$EUID" -eq 0 ]]; then
-	# Import settings
-	source_settings
-
-	# Take appropriate action
-	PS3='Action to take: '
-	select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
-		case $REPLY in
-			1) fetch_news;;
-			2) system_upgrade;;
-			3) system_clean;;
-			4) system_errors;;
-			5) backup_system;;
-			6) restore_system;;
-			7) update_settings;;
-			8) break;;
-			*) echo "Please choose an existing option";;
-		esac
-	done
-else
-	printf "ERROR: This package must be run with root privileges\n"
+# Make sure script is running as root
+if [[ "$EUID" -ne 0 ]]; then
+	exec sudo /bin/bash
 fi
+
+# Import settings
+source_settings
+
+# Take appropriate action
+PS3='Action to take: '
+select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
+	case $REPLY in
+		1) fetch_news;;
+		2) system_upgrade;;
+		3) system_clean;;
+		4) system_errors;;
+		5) backup_system;;
+		6) restore_system;;
+		7) update_settings;;
+		8) break;;
+		*) echo "Please choose an existing option";;
+	esac
+done
