@@ -85,7 +85,7 @@ rebuild_aur() {
 						cd "$aur_pkg"
 						git pull origin master
 						source PKGBUILD
-						pacman -S --asdeps "${depends[@]}" "${makedepends[@]}" --noconfirm
+						pacman -S --needed --asdeps "${depends[@]}" "${makedepends[@]}" --noconfirm
 						sudo -u nobody makepkg -fc --noconfirm
 						pacman -U "$(sudo -u nobody makepkg --packagelist)" --noconfirm
 					fi
@@ -96,6 +96,7 @@ rebuild_aur() {
 				printf "...No AUR packages in $AUR_DIR\n"
 			fi
 		else
+			printf "AUR package directory not set up\n"
 			aur_setup
 		fi
 	fi
@@ -191,7 +192,7 @@ clean_symlinks() {
 
 clean_old_config() {
 	# Remind the user to clean up old configuration files
-	printf "\nNOTICE: Check the following directories for old configuration files\n"
+	printf "\nCheck the following directories for old configuration files\n"
 	printf "~/\n"
 	printf "~/.config/\n"
 	printf "~/.cache/\n"
