@@ -227,7 +227,7 @@ execute_restore() {
 	if [[ "$REPLY" == "y" ]]; then
 		if [ -n "$(find $BACKUP_LOCATION -maxdepth 0 -type d -not -empty 2>/dev/null)" ]; then
 			printf "\nRestoring the system...\n"
-			sync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION/" /
+			rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION/" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else
 			printf "\nYou must create a system backup before restoring the system from it\n"; 
@@ -317,21 +317,26 @@ if [[ "$EUID" -ne 0 ]]; then
 	exec sudo /bin/bash
 fi
 
-# Import settings
-source_settings
+# Continue if script is running as root
+if [[ "$EUID" -eq 0 ]]; then
+	# Import settings
+	source_settings
 
-# Take appropriate action
-PS3='Action to take: '
-select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
-	case $REPLY in
-		1) fetch_news;;
-		2) system_upgrade;;
-		3) system_clean;;
-		4) system_errors;;
-		5) backup_system;;
-		6) restore_system;;
-		7) update_settings;;
-		8) break;;
-		*) echo "Please choose an existing option";;
-	esac
-done
+	# Take appropriate action
+	PS3='Action to take: '
+	select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
+		case $REPLY in
+			1) fetch_news;;
+			2) system_upgrade;;
+			3) system_clean;;
+			4) system_errors;;
+			5) backup_system;;
+			6) restore_system;;
+			7) update_settings;;
+			8) break;;
+			*) echo "Please choose an existing option";;
+		esac
+	done
+else
+	printf "maint must be run with root privileges!\n"
+fi
