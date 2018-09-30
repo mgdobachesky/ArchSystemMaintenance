@@ -14,7 +14,11 @@ fetch_warnings() {
 	printf "\nChecking Arch Linux news...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
-	python $(pkg_path)/archNews.py "$last_upgrade"
+	if [[ -n "$last_upgrade" ]]; then
+		python $(pkg_path)/archNews.py "$last_upgrade"
+	else
+		python $(pkg_path)/archNews.py
+	fi
 	alerts="$?"
 	
 	if [[ "$alerts" == 1 ]]; then
@@ -135,7 +139,10 @@ upgrade_warnings() {
 	# Get any warnings that might have occured while upgrading the system
 	printf "\nChecking for upgrade warnings...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
-	paclog --after="$last_upgrade" | paclog --warnings
+
+	if [[ -n "$last_upgrade" ]]; then
+		paclog --after="$last_upgrade" | paclog --warnings
+	fi
 	printf "...Done checking for upgrade warnings\n"
 }
 
@@ -203,7 +210,7 @@ execute_restore() {
 	if [[ "$REPLY" == "y" ]]; then
 		if [ -n "$(find $BACKUP_LOCATION -maxdepth 0 -type d -not -empty 2>/dev/null)" ]; then
 			printf "\nRestoring the system...\n"
-			rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION" /
+			sync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION/" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else
 			printf "\nYou must create a system backup before restoring the system from it\n"; 
