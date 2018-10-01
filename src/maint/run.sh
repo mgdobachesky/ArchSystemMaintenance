@@ -62,11 +62,10 @@ aur_setup() {
 		if [[ ! -d "$AUR_DIR" ]]; then
 			mkdir "$AUR_DIR"
 		fi
-
 		chgrp nobody "$AUR_DIR"
 		chmod g+ws "$AUR_DIR"
-		setfacl -m u::rwx,g::rwx "$AUR_DIR"
-		setfacl -d --set u::rwx,g::rwx,o::- "$AUR_DIR"
+		setfacl -d --set u::rwx,g::rx,o::rx "$AUR_DIR"
+		setfacl -m u::rwx,g::rwx,o::- "$AUR_DIR"
 		printf "...AUR package directory set up at $AUR_DIR\n"
 	fi
 }
@@ -82,6 +81,9 @@ rebuild_aur() {
 				starting_dir="$(pwd)"
 				for aur_pkg in "$AUR_DIR"/*/; do 
 					if [[ -d "$aur_pkg" ]]; then
+						if sudo -u nobody bash -c "[[ ! -w $aur_pkg ]]"; then
+							chmod -R g+w "$aur_pkg"
+						fi
 						cd "$aur_pkg"
 						git pull origin master
 						source PKGBUILD
@@ -314,7 +316,7 @@ update_settings() {
 
 # Make sure script is running as root
 if [[ "$EUID" -ne 0 ]]; then
-	exec sudo /bin/bash
+	exec sudo /bin/bash maint
 fi
 
 # Continue if script is running as root
