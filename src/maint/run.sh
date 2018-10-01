@@ -219,6 +219,7 @@ execute_backup() {
 	if [[ "$REPLY" == "y" ]]; then
 		printf "\nBacking up the system...\n"
 		rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} / "$BACKUP_LOCATION"
+		touch "$BACKUP_LOCATION/verified_backup_image.lock"
 		printf "...Done backing up to $BACKUP_LOCATION\n"
 	fi
 }
@@ -227,9 +228,9 @@ execute_restore() {
 	# Execute restore operations
 	read -r -p "Do you want to restore the system from the image located at $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" == "y" ]]; then
-		if [ -n "$(find $BACKUP_LOCATION -maxdepth 0 -type d -not -empty 2>/dev/null)" ]; then
+		if [[ -a "$BACKUP_LOCATION/verified_backup_image.lock" ]]; then
 			printf "\nRestoring the system...\n"
-			rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} "$BACKUP_LOCATION/" /
+			rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","/verified_backup_image.lock","$BACKUP_LOCATION"} "$BACKUP_LOCATION/" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else
 			printf "\nYou must create a system backup before restoring the system from it\n"; 
