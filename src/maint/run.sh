@@ -27,7 +27,7 @@ fetch_warnings() {
 
 		printf "\n"
 		read -r -p "Are you ready to continue? [y/N]"
-		if [[ "$REPLY" != "y" ]]; then
+		if [[ ! "$REPLY" =~ [yY] ]]; then
 			exit
 		fi
 	else
@@ -39,7 +39,7 @@ update_mirrorlist() {
 	# Get an up-to-date mirrorlist that is sorted by speed and syncronization
 	printf "\n"
 	read -r -p "Do you want to get an updated mirrorlist? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
+	if [[ "$REPLY" =~ [yY] ]]; then
 		printf "Updating mirrorlist...\n"
 		reflector --country "$MIRRORLIST_COUNTRY" --latest 200 --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 		printf "...Mirrorlist updated\n"
@@ -57,7 +57,7 @@ aur_setup() {
 	# Make sure the AUR directory is setup correctly
 	printf "\n"
 	read -r -p "Do you want to setup the AUR package directory at $AUR_DIR? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
+	if [[ "$REPLY" =~ [yY] ]]; then
 		printf "Setting up AUR package directory...\n"
 		if [[ ! -d "$AUR_DIR" ]]; then
 			mkdir "$AUR_DIR"
@@ -74,7 +74,7 @@ rebuild_aur() {
 	# Rebuild AUR packages
 	printf "\n"
 	read -r -p "Do you want to rebuild AUR packages? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
+	if [[ "$REPLY" =~ [yY] ]]; then
 		if sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
 			printf "Rebuilding AUR packages...\n"
 			if [[ -n "$(ls -A $AUR_DIR)" ]]; then
@@ -114,7 +114,7 @@ remove_orphaned() {
 		printf "ORPHANED PACKAGES FOUND:\n"
 		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
-		if [[ "$REPLY" == "y" ]]; then
+		if [[ "$REPLY" =~ [yY] ]]; then
 			pacman -Rns --noconfirm "${orphaned[*]}"
 		fi
 	else 
@@ -141,7 +141,7 @@ remove_dropped() {
 		printf "DROPPED PACKAGES FOUND:\n"
 		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
-		if [[ "$REPLY" == "y" ]]; then
+		if [[ "$REPLY" =~ [yY] ]]; then
 			pacman -Rns --noconfirm "${dropped[*]}"
 		fi
 	else
@@ -171,7 +171,7 @@ clean_cache() {
 	# Clean up the package cache
 	printf "\n"
 	read -r -p "Do you want to clean up the package cache? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
+	if [[ "$REPLY" =~ [yY] ]]; then
 		printf "Cleaning up the package cache...\n"
 		paccache -r
 		printf "...Done cleaning up the package cache\n"
@@ -186,7 +186,7 @@ clean_symlinks() {
 		printf "BROKEN SYMLINKS FOUND:\n"
 		printf '%s\n' "${broken_symlinks[@]}"
 		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
-		if [[ "$REPLY" == "y" ]]; then
+		if [[ "$REPLY" =~ [yY] ]]; then
 			rm "${broken_symlinks[*]}"
 		fi
 	else
@@ -218,7 +218,7 @@ journal_errors() {
 execute_backup() {
 	# Execute backup operations
 	read -r -p "Do you want to backup the system to an image located at $BACKUP_LOCATION? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
+	if [[ "$REPLY" =~ [yY] ]]; then
 		printf "\nBacking up the system...\n"
 		rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} / "$BACKUP_LOCATION"
 		touch "$BACKUP_LOCATION/verified_backup_image.lock"
@@ -229,7 +229,7 @@ execute_backup() {
 execute_restore() {
 	# Execute restore operations
 	read -r -p "Do you want to restore the system from the image located at $BACKUP_LOCATION? [y/N]"
-	if [[ "$REPLY" == "y" ]]; then
+	if [[ "$REPLY" =~ [yY] ]]; then
 		if [[ -a "$BACKUP_LOCATION/verified_backup_image.lock" ]]; then
 			printf "\nRestoring the system...\n"
 			rsync -aAXHS --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","/verified_backup_image.lock","$BACKUP_LOCATION"} "$BACKUP_LOCATION/" /
