@@ -181,7 +181,7 @@ clean_cache() {
 clean_symlinks() {
 	# Check for broken symlinks in specified directories
 	printf "\nChecking for broken symlinks...\n"
-	mapfile -t broken_symlinks < <(find "${SYMLINKS_CHECK[*]}" -xtype l -print)
+	mapfile -t broken_symlinks < <(find ${SYMLINKS_CHECK[*]} -xtype l -print)
 	if [[ "${broken_symlinks[*]}" ]]; then
 		printf "BROKEN SYMLINKS FOUND:\n"
 		printf '%s\n' "${broken_symlinks[@]}"
