@@ -3,6 +3,9 @@
 # Country to generate the mirror list for
 export MIRRORLIST_COUNTRY='United States'
 
+# Decide to upgrade AUR Packages while rebuilding
+export AUR_UPGRADE=true
+
 # Directory where currently installed AUR packages are stored
 export AUR_DIR="/home/build"
 

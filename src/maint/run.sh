@@ -85,7 +85,9 @@ rebuild_aur() {
 							chmod -R g+w "$aur_pkg"
 						fi
 						cd "$aur_pkg"
-						git pull origin master
+						if [[ "$AUR_UPGRADE" == "true" ]]; then
+							git pull origin master
+						fi
 						source PKGBUILD
 						pacman -S --needed --asdeps "${depends[@]}" "${makedepends[@]}" --noconfirm
 						sudo -u nobody makepkg -fc --noconfirm
