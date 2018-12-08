@@ -75,7 +75,7 @@ rebuild_aur() {
 	printf "\n"
 	read -r -p "Do you want to rebuild AUR packages? [y/N]"
 	if [[ "$REPLY" =~ [yY] ]]; then
-		if sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
+		if [[ -w $AUR_DIR ]] && sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
 			printf "Rebuilding AUR packages...\n"
 			if [[ -n "$(ls -A $AUR_DIR)" ]]; then
 				starting_dir="$(pwd)"
