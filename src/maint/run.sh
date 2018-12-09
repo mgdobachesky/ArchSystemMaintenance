@@ -110,12 +110,12 @@ remove_orphaned() {
 	# Remove unused orphan packages
 	printf "\nChecking for orphaned packages...\n"
 	mapfile -t orphaned < <(pacman -Qtdq)
-	if [[ ${orphaned[*]} ]]; then
+	if [[ "${orphaned[*]}" ]]; then
 		printf "ORPHANED PACKAGES FOUND:\n"
 		printf '%s\n' "${orphaned[@]}"
 		read -r -p "Do you want to remove the above orphaned packages? [y/N]"
 		if [[ "$REPLY" =~ [yY] ]]; then
-			pacman -Rns --noconfirm ${orphaned[*]}
+			pacman -Rns --noconfirm "${orphaned[@]}"
 		fi
 	else 
 		printf "...No orphaned packages found\n"
@@ -137,12 +137,12 @@ remove_dropped() {
 		mapfile -t dropped < <(pacman -Qmq)
 	fi
 
-	if [[ ${dropped[*]} ]]; then
+	if [[ "${dropped[*]}" ]]; then
 		printf "DROPPED PACKAGES FOUND:\n"
 		printf '%s\n' "${dropped[@]}"
 		read -r -p "Do you want to remove the above dropped packages? [y/N]"
 		if [[ "$REPLY" =~ [yY] ]]; then
-			pacman -Rns --noconfirm ${dropped[*]}
+			pacman -Rns --noconfirm "${dropped[@]}"
 		fi
 	else
 		printf "...No dropped packages found\n"
@@ -181,13 +181,13 @@ clean_cache() {
 clean_symlinks() {
 	# Check for broken symlinks in specified directories
 	printf "\nChecking for broken symlinks...\n"
-	mapfile -t broken_symlinks < <(find ${SYMLINKS_CHECK[*]} -xtype l -print)
-	if [[ ${broken_symlinks[*]} ]]; then
+	mapfile -t broken_symlinks < <(find "${SYMLINKS_CHECK[@]}" -xtype l -print)
+	if [[ "${broken_symlinks[*]}" ]]; then
 		printf "BROKEN SYMLINKS FOUND:\n"
 		printf '%s\n' "${broken_symlinks[@]}"
 		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
 		if [[ "$REPLY" =~ [yY] ]]; then
-			printf '%s\0' "${broken_symlinks[@]}" | xargs -0 rm
+			rm "${broken_symlinks[@]}"
 		fi
 	else
 		printf "...No broken symlinks found\n"
