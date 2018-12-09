@@ -20,9 +20,10 @@ makepkg -sirc
 
 ## Setup
 1. Update settings to reflect the country you want your mirrorlists to be generated in. (Default is United States)
-2. Update settings to use the location where you store your AUR packages. (Default is $HOME/.aur)
-3. Update settings to use the location of where you want to store your system backups. (Default is /usr/local/backup)
-4. Tune the list of directories to look in for broken symlinks to your liking. (Meaningful default list provided)
+2. Update whether or not you want upgrade AUR packages while rebuilding them. (Default is true)
+3. Update settings to use the location where you store your AUR packages. (Default is /home/build)
+4. Update settings to use the location of where you want to store your system backups. (Default is /usr/local/backup)
+5. Tune the list of directories to look in for broken symlinks to your liking. (Meaningful default list provided)
 
 ## Usage
 maint
