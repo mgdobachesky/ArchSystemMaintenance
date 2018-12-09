@@ -187,7 +187,7 @@ clean_symlinks() {
 		printf '%s\n' "${broken_symlinks[@]}"
 		read -r -p "Do you want to remove the broken symlinks above? [y/N]"
 		if [[ "$REPLY" =~ [yY] ]]; then
-			rm ${broken_symlinks[*]}
+			printf '%s\0' "${broken_symlinks[@]}" | xargs -0 rm
 		fi
 	else
 		printf "...No broken symlinks found\n"
