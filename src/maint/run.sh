@@ -217,7 +217,7 @@ journal_errors() {
 
 execute_backup() {
 	# Execute backup operations
-	read -r -p "Do you want to backup the system to an image located at $BACKUP_LOCATION? [y/N]"
+	read -r -p "Do you want to backup the system to $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" =~ [yY] ]]; then
 		printf "\nBacking up the system...\n"
 		rsync -aAXHS --info=progress2 --delete \
@@ -230,7 +230,7 @@ execute_backup() {
 
 execute_restore() {
 	# Execute restore operations
-	read -r -p "Do you want to restore the system from the image located at $BACKUP_LOCATION? [y/N]"
+	read -r -p "Do you want to restore the system from $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" =~ [yY] ]]; then
 		if [[ -a "$BACKUP_LOCATION/verified_backup_image.lock" ]]; then
 			printf "\nRestoring the system...\n"
