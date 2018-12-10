@@ -6,6 +6,9 @@ export MIRRORLIST_COUNTRY='United States'
 # Decide to upgrade AUR Packages while rebuilding
 export AUR_UPGRADE=true
 
+# Whitelist of AUR packages that should not show up as dropped packages
+export AUR_WHITELIST=()
+
 # Directory where currently installed AUR packages are stored
 export AUR_DIR="/home/build"
 

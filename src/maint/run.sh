@@ -75,7 +75,7 @@ rebuild_aur() {
 	printf "\n"
 	read -r -p "Do you want to rebuild AUR packages? [y/N]"
 	if [[ "$REPLY" =~ [yY] ]]; then
-		if [[ -w $AUR_DIR ]] && sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
+		if [[ -w "$AUR_DIR" ]] && sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
 			printf "Rebuilding AUR packages...\n"
 			if [[ -n "$(ls -A $AUR_DIR)" ]]; then
 				starting_dir="$(pwd)"
@@ -125,17 +125,18 @@ remove_orphaned() {
 remove_dropped() {
 	# Remove dropped packages
 	printf "\nChecking for dropped packages...\n"
-	if [[ -n "${AUR_DIR/[ ]*\n/}" ]]; then
-		aur_list="maint"
+	whitelist="maint"
+	for aur_pkg in "${AUR_WHITELIST[@]}"; do
+		whitelist="$whitelist|$aur_pkg"
+	done
+	if [[ -d "$AUR_DIR" ]]; then
 		for aur_pkg in "$AUR_DIR"/*/; do 
 			if [[ -d "$aur_pkg" ]]; then
-				aur_list="$aur_list|$(basename "$aur_pkg")"
+				whitelist="$whitelist|$(basename "$aur_pkg")"
 			fi
 		done
-		mapfile -t dropped < <(awk "!/${aur_list}/" <(pacman -Qmq))
-	else
-		mapfile -t dropped < <(pacman -Qmq)
 	fi
+	mapfile -t dropped < <(awk "!/${whitelist}/" <(pacman -Qmq))
 
 	if [[ "${dropped[*]}" ]]; then
 		printf "DROPPED PACKAGES FOUND:\n"
