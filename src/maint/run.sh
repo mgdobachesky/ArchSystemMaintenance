@@ -257,8 +257,8 @@ source_settings() {
 
 pkg_path() {
 	# The package path is set during installation with the PKGBUILD
-	# local pkg_path={{PKG_PATH}}
-	local pkg_path="/home/franciscocb/dev/ArchSystemMaintenance/src/maint"
+	local pkg_path={{PKG_PATH}}
+	# local pkg_path="/home/franciscocb/dev/ArchSystemMaintenance/src/maint"
 	echo $pkg_path
 }
 
