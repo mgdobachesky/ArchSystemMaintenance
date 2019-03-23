@@ -1,4 +1,8 @@
-#!/bin/bash
+# User interface of choice (cli, nCurses)
+export USER_INTERFACE='nCurses'
+
+# Editor used to modify settings (nano, vim)
+export SETTINGS_EDITOR='vim'
 
 # Country to generate the mirror list for
 export MIRRORLIST_COUNTRY='United States'
