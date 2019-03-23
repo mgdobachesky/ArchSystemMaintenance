@@ -258,7 +258,6 @@ source_settings() {
 pkg_path() {
 	# The package path is set during installation with the PKGBUILD
 	local pkg_path={{PKG_PATH}}
-	# local pkg_path="/home/franciscocb/dev/ArchSystemMaintenance/src/maint"
 	echo $pkg_path
 }
 
@@ -376,7 +375,7 @@ if [[ "$EUID" -eq 0 ]]; then
 			8) break;;
 			*) echo "Please choose an existing option";;
 		esac
-		done
+	done
 else
 	printf "maint must be run with root privileges!\n"
 fi
