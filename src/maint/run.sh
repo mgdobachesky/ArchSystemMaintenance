@@ -20,7 +20,7 @@ fetch_warnings() {
 		python $(pkg_path)/archNews.py
 	fi
 	alerts="$?"
-	
+
 	if [[ "$alerts" == 1 ]]; then
 		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention.\n"
 		printf "Continue only after fully resolving the above issue(s).\n"
@@ -79,7 +79,7 @@ rebuild_aur() {
 			printf "Rebuilding AUR packages...\n"
 			if [[ -n "$(ls -A $AUR_DIR)" ]]; then
 				starting_dir="$(pwd)"
-				for aur_pkg in "$AUR_DIR"/*/; do 
+				for aur_pkg in "$AUR_DIR"/*/; do
 					if [[ -d "$aur_pkg" ]]; then
 						if sudo -u nobody bash -c "[[ ! -w $aur_pkg ]]"; then
 							chmod -R g+w "$aur_pkg"
@@ -117,7 +117,7 @@ remove_orphaned() {
 		if [[ "$REPLY" =~ [yY] ]]; then
 			pacman -Rns --noconfirm "${orphaned[@]}"
 		fi
-	else 
+	else
 		printf "...No orphaned packages found\n"
 	fi
 }
@@ -130,7 +130,7 @@ remove_dropped() {
 		whitelist="$whitelist|$aur_pkg"
 	done
 	if [[ -d "$AUR_DIR" ]]; then
-		for aur_pkg in "$AUR_DIR"/*/; do 
+		for aur_pkg in "$AUR_DIR"/*/; do
 			if [[ -d "$aur_pkg" ]]; then
 				whitelist="$whitelist|$(basename "$aur_pkg")"
 			fi
@@ -240,7 +240,7 @@ execute_restore() {
 			"$BACKUP_LOCATION/" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else
-			printf "\nYou must create a system backup before restoring the system from it\n"; 
+			printf "\nYou must create a system backup before restoring the system from it\n";
 		fi
 	fi
 }
@@ -258,6 +258,7 @@ source_settings() {
 pkg_path() {
 	# The package path is set during installation with the PKGBUILD
 	local pkg_path={{PKG_PATH}}
+	# local pkg_path="/home/franciscocb/dev/ArchSystemMaintenance/src/maint"
 	echo $pkg_path
 }
 
@@ -318,6 +319,11 @@ update_settings() {
 	printf "\n"
 }
 
+dialog_check_exit() {
+	echo "Done - Press enter to exit";
+	read
+}
+
 #######################################################################
 ############################## Main Menu ##############################
 #######################################################################
@@ -331,6 +337,30 @@ fi
 if [[ "$EUID" -eq 0 ]]; then
 	# Import settings
 	source_settings
+
+	while [[ "$1" == "--dialog" ]]
+	do
+		REPLY=$(dialog --stdout --title "ArchSystemMaintenance" --menu "Choose maintenence type:" 15 50 8 \
+		        1 "Arch Linux News" \
+				2 "Upgrade System" \
+				3 "Clean Filesystem" \
+				4 "System Error Check" \
+				5 "Backup System" \
+				6 "Restore System" \
+				7 "Update Settings" \
+				0 "Exit")
+		clear;
+		case $REPLY in
+			1) fetch_news;;
+			2) system_upgrade; dialog_check_exit;;
+			3) system_clean; dialog_check_exit;;
+			4) system_errors;;
+			5) backup_system; dialog_check_exit;;
+			6) restore_system; dialog_check_exit;;
+			7) update_settings;;
+			*) clear; exit;;
+		esac
+	done
 
 	# Take appropriate action
 	PS3='Action to take: '
@@ -346,7 +376,7 @@ if [[ "$EUID" -eq 0 ]]; then
 			8) break;;
 			*) echo "Please choose an existing option";;
 		esac
-	done
+		done
 else
 	printf "maint must be run with root privileges!\n"
 fi
