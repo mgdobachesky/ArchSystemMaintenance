@@ -245,8 +245,36 @@ execute_restore() {
 	fi
 }
 
+fallback_editor() {
+	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default" 1>&2
+	read
+	vim $(pkg_path)/settings.sh
+}
+
 modify_settings() {
 	# Modify user settings
-	$SETTINGS_EDITOR $(pkg_path)/settings.sh
+	case "$SETTINGS_EDITOR" in
+		'vim')
+			vim $(pkg_path)/settings.sh;;
+		'nano')
+			check_optdepends nano
+			if [[ "$?" == 0 ]]; then
+				nano $(pkg_path)/settings.sh
+			else
+				printf "\nnano is not installed"
+				fallback_editor
+			fi
+			;;
+		*)
+			fallback_editor;;
+	esac
+}
+
+check_optdepends() {
+	if [[ -n "$(command -v $1)" ]]; then
+		return 0
+	else
+		return 1
+	fi
 }
 

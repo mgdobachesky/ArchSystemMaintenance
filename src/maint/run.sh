@@ -2,7 +2,11 @@
 
 pkg_path() {
 	# Return the path of the package
-	dirname "$(readlink $0)"
+	if [[ -L "$0" ]]; then
+		dirname "$(readlink $0)"
+	else
+		dirname "$0"
+	fi
 }
 
 source_settings() {
@@ -20,20 +24,30 @@ source_menu() {
 	source $(pkg_path)/menu.sh
 }
 
-execute_maint() {
+repair_settings() {
+	read -r -p "Would you like to repair settings? [y/N]"
+	if [[ "$REPLY" =~ [yY] ]]; then
+		update_settings
+	fi
+}
+
+fallback_ui() {
+	printf "\nIncorrect USER_INTERFACE setting -- falling back to default\n" 1>&2
+	read
+	source $(pkg_path)/ui/cli.sh
+}
+
+execute_main() {
 	main
 	
 	if [[ "$?" == 1 ]]; then
-		read -r -p "Would you like to update settings? [y/N]"
-		if [[ "$REPLY" =~ [yY] ]]; then
-			update_settings
-		fi
+		repair_settings
 	fi
 }
 
 # Make sure script is running as root
 if [[ "$EUID" -ne 0 ]]; then
-	echo "maint must be run as root" 1>&2
+	printf "This script must be run as root\n" 1>&2
 	exit 1
 fi
 
@@ -46,15 +60,12 @@ if [[ "$EUID" -eq 0 ]]; then
 
 	case "$USER_INTERFACE" in
 		'cli')
-			source $(pkg_path)/ui/cli.sh
-			;;
+			source $(pkg_path)/ui/cli.sh;;
 		'nCurses')
-			source $(pkg_path)/ui/nCurses.sh
-			;;
+			source $(pkg_path)/ui/nCurses.sh;;
 		*)
-			echo "Incorrect USER_INTERFACE setting" 1>&2
-			exit 1	
+			fallback_ui;;	
 	esac
 
-	execute_maint
+	execute_main
 fi

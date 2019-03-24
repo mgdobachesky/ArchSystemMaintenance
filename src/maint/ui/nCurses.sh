@@ -4,7 +4,7 @@
 ####################### nCurses User Interface ########################
 #######################################################################
 
-dialog_check_exit() {
+check_exit() {
 	printf "Done - Press enter to continue\n";
 	read
 }
@@ -26,11 +26,11 @@ main () {
 			clear;
 			case "$REPLY" in
 				1) fetch_news;;
-				2) system_upgrade; dialog_check_exit;;
-				3) system_clean; dialog_check_exit;;
+				2) system_upgrade; check_exit;;
+				3) system_clean; check_exit;;
 				4) system_errors;;
-				5) backup_system; dialog_check_exit;;
-				6) restore_system; dialog_check_exit;;
+				5) backup_system; check_exit;;
+				6) restore_system; check_exit;;
 				7) update_settings;;
 				*) clear; exit;;
 			esac

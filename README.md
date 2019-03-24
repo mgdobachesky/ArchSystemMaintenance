@@ -19,15 +19,17 @@ git pull origin master <br />
 makepkg -sirc
 
 ## Setup
-1. Update settings to reflect the country you want your mirrorlists to be generated in. (Default is United States)
-2. Update whether or not you want upgrade AUR packages while rebuilding them. (Default is true)
-3. Add AUR packages to not be marked as dropped packages to the AUR whitelist. (None by default)
-4. Update the AUR build directory to reflect where you store your AUR packages. (Default is /home/build)
-5. Update the location where you want to store your system backups. (Default is /usr/local/backup)
-6. Tune the list of directories to look in while searching for broken symlinks. (Meaningful default list provided)
+1. Update settings to choose the UI you want to use. (Default is an nCurses based UI)
+2. Update settings to choose the editor you want to use. (Default is vim)
+3. Update settings to reflect the country you want your mirrorlists to be generated in. (Default is United States)
+4. Update whether or not you want upgrade AUR packages while rebuilding them. (Default is true)
+5. Add AUR packages to not be marked as dropped packages to the AUR whitelist. (None by default)
+6. Update the AUR build directory to reflect where you store your AUR packages. (Default is /home/build)
+7. Update the location where you want to store your system backups. (Default is /usr/local/backup)
+8. Tune the list of directories to look in while searching for broken symlinks. (Meaningful default list provided)
 
 ## Usage
-maint
+sudo maint
 
 #### Options:
 1. Arch Linux News
@@ -38,6 +40,3 @@ maint
 6. Restore System
 7. Update Settings
 8. Exit
-
-## Notes for advanced users
-* If you are building this package from source then you will have to replace {{PKG_PATH}} in the main executable.
