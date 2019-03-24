@@ -28,7 +28,7 @@ main () {
 				1) fetch_news;;
 				2) system_upgrade; check_exit;;
 				3) system_clean; check_exit;;
-				4) system_errors;;
+				4) system_errors; check_exit;;
 				5) backup_system; check_exit;;
 				6) restore_system; check_exit;;
 				7) update_settings;;
