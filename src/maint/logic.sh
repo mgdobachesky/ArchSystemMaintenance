@@ -234,7 +234,7 @@ execute_backup() {
 			touch "$BACKUP_LOCATION/verified_backup_image.lock"
 			printf "...Done backing up to $BACKUP_LOCATION\n"
 		else
-			printf "$BACKUP_LOCATION is not an existing directory\n"
+			printf "\n$BACKUP_LOCATION is not an existing directory\n"
 		fi
 	fi
 }
