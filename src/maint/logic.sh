@@ -6,11 +6,13 @@
 
 arch_news() {
 	# Grab the latest Arch Linux news
+	export COLUMNS
 	python $(pkg_path)/other/archNews.py | less
 }
 
 fetch_warnings() {
 	# Fetch and warn the user if any known problems have been published since the last upgrade
+	export COLUMNS
 	printf "\nChecking Arch Linux news...\n"
 	last_upgrade="$(sed -n '/pacman -Syu/h; ${x;s/.\([0-9-]*\).*/\1/p;}' /var/log/pacman.log)"
 
@@ -22,8 +24,8 @@ fetch_warnings() {
 	alerts="$?"
 
 	if [[ "$alerts" == 1 ]]; then
-		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention.\n"
-		printf "Continue only after fully resolving the above issue(s).\n"
+		printf "WARNING: This upgrade requires out-of-the-ordinary user intervention\n"
+		printf "Continue only after fully resolving the above issue(s)\n"
 
 		printf "\n"
 		read -r -p "Are you ready to continue? [y/N]"
@@ -106,7 +108,7 @@ rebuild_aur() {
 	fi
 }
 
-remove_orphaned() {
+remove_orphaned_packages() {
 	# Remove unused orphan packages
 	printf "\nChecking for orphaned packages...\n"
 	mapfile -t orphaned < <(pacman -Qtdq)
@@ -122,7 +124,7 @@ remove_orphaned() {
 	fi
 }
 
-remove_dropped() {
+remove_dropped_packages() {
 	# Remove dropped packages
 	printf "\nChecking for dropped packages...\n"
 	whitelist="maint"
@@ -168,7 +170,7 @@ upgrade_warnings() {
 	printf "...Done checking for upgrade warnings\n"
 }
 
-clean_cache() {
+clean_package_cache() {
 	# Clean up the package cache
 	printf "\n"
 	read -r -p "Do you want to clean up the package cache? [y/N]"
@@ -179,7 +181,7 @@ clean_cache() {
 	fi
 }
 
-clean_symlinks() {
+clean_broken_symlinks() {
 	# Check for broken symlinks in specified directories
 	printf "\nChecking for broken symlinks...\n"
 	mapfile -t broken_symlinks < <(find "${SYMLINKS_CHECK[@]}" -xtype l -print)
@@ -197,11 +199,15 @@ clean_symlinks() {
 
 clean_old_config() {
 	# Remind the user to clean up old configuration files
-	printf "\nCheck the following directories for old configuration files\n"
-	printf "~/\n"
-	printf "~/.config/\n"
-	printf "~/.cache/\n"
-	printf "~/.local/share/\n"
+	user_home="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
+	if [[ -z "$user_home" ]]; then
+		user_home="~"
+	fi
+	printf "\nREMINDER: Check the following directories for old configuration files\n"
+	printf "$user_home/\n"
+	printf "$user_home/.config/\n"
+	printf "$user_home/.cache/\n"
+	printf "$user_home/.local/share/\n"
 }
 
 failed_services() {
@@ -220,12 +226,16 @@ execute_backup() {
 	# Execute backup operations
 	read -r -p "Do you want to backup the system to $BACKUP_LOCATION? [y/N]"
 	if [[ "$REPLY" =~ [yY] ]]; then
-		printf "\nBacking up the system...\n"
-		rsync -aAXHS --info=progress2 --delete \
-		--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} \
-		/ "$BACKUP_LOCATION"
-		touch "$BACKUP_LOCATION/verified_backup_image.lock"
-		printf "...Done backing up to $BACKUP_LOCATION\n"
+		if [[ -d "$BACKUP_LOCATION" ]]; then
+			printf "\nBacking up the system...\n"
+			rsync -aAXHS --info=progress2 --delete \
+			--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} \
+			/ "$BACKUP_LOCATION"
+			touch "$BACKUP_LOCATION/verified_backup_image.lock"
+			printf "...Done backing up to $BACKUP_LOCATION\n"
+		else
+			printf "$BACKUP_LOCATION is not an existing directory\n"
+		fi
 	fi
 }
 

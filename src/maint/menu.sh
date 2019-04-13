@@ -16,17 +16,17 @@ system_upgrade() {
 	update_mirrorlist
 	upgrade_system
 	rebuild_aur
-	remove_orphaned
-	remove_dropped
-	handle_pacfiles
 	upgrade_warnings
 	printf "\n"
 }
 
 system_clean() {
 	# Clean the filesystem
-	clean_cache
-	clean_symlinks
+	remove_orphaned_packages
+	remove_dropped_packages
+	clean_package_cache
+	clean_broken_symlinks
+	handle_pacfiles
 	clean_old_config
 	printf "\n"
 }

@@ -20,11 +20,4 @@ export AUR_DIR="/home/build"
 export BACKUP_LOCATION="/usr/local/backup"
 
 # Directories in which broken symlinks should be searched
-export SYMLINKS_CHECK=("/bin"
-                       "/etc"
-                       "/home"
-                       "/lib"
-                       "/lib64"
-                       "/opt"
-                       "/srv"
-                       "/usr")
+export SYMLINKS_CHECK=("/etc" "/home" "/opt" "/srv" "/usr")

@@ -4,6 +4,7 @@ import sys
 import urllib.request
 import xmltodict
 import re
+import os
 from dateutil.parser import parse
 
 
@@ -26,11 +27,10 @@ def upgrade_alerts(last_upgrade = False):
     for news_post in arch_news['rss']['channel']['item']:
         if last_upgrade == False or parse(news_post['pubDate']).replace(tzinfo=None) >= parse(last_upgrade):
             exit_code = 1
-            print('~' * 75)
-            print("TITLE: ", news_post['title'])
-            print("DATE: ", news_post['pubDate'])
-            print("DESCRIPTION: ", clean_html(news_post['description']))
-            print("\n")
+            print('~' * int(os.environ['COLUMNS']))
+            print("\nTITLE: ", news_post['title'], "\n")
+            print("DATE: ", news_post['pubDate'], "\n")
+            print("DESCRIPTION: ", clean_html(news_post['description']), "\n")
     
     return exit_code
 
