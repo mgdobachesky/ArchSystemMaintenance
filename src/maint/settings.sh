@@ -7,7 +7,7 @@ export SETTINGS_EDITOR='vim'
 # Country to generate the mirror list for
 export MIRRORLIST_COUNTRY='United States'
 
-# Decide to upgrade AUR Packages while rebuilding
+# Decide whether or not to upgrade AUR Packages while rebuilding
 export AUR_UPGRADE=true
 
 # Whitelist of AUR packages that should not show up as dropped packages
