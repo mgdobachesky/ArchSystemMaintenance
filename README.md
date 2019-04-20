@@ -14,19 +14,27 @@ cd maint <br />
 makepkg -sirc
 
 #### Upgrade:
+###### Automatic Upgrade
+While running a system upgrade you will be prompted to set up the AUR directory. <br />
+Choose to create the AUR directory at the location specified in settings. <br />
+Move the git cloned package from the installation step into the AUR directory. <br />
+Next time you upgrade your system, just choose to update packages in your AUR directory.
+###### Manual Upgrade
 cd maint <br />
 git pull origin master <br />
 makepkg -sirc
 
 ## Setup
-1. Update settings to choose the UI you want to use. (Default is an nCurses based UI)
-2. Update settings to choose the editor you want to use. (Default is vim)
-3. Update settings to reflect the country you want your mirrorlists to be generated in. (Default is United States)
-4. Update whether or not you want upgrade AUR packages while rebuilding them. (Default is true)
-5. Add AUR packages to not be marked as dropped packages to the AUR whitelist. (None by default)
-6. Update the AUR build directory to reflect where you store your AUR packages. (Default is /home/build)
-7. Update the location where you want to store your system backups. (Default is /usr/local/backup)
-8. Tune the list of directories to look in while searching for broken symlinks. (Meaningful default list provided)
+After running maint, choose the option to update settings. <br />
+The following options are available:
+* User interface style (default is dialog)
+* Settings editor (default is vim)
+* Mirrorlist country (default is United States)
+* Option to upgrade AUR packages while rebuilding them (default is true)
+* Whitelist of AUR packages to not be seen as dropped packages
+* AUR directory location (default is /home/build)
+* Location of system backups (default is /usr/local/backup)
+* Directories in which to search for broken symlinks while cleaning
 
 ## Usage
 sudo maint

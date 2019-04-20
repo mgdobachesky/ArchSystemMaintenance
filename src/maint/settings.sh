@@ -1,5 +1,5 @@
-# User interface of choice (cli, nCurses)
-export USER_INTERFACE='nCurses'
+# User interface of choice (cli, dialog)
+export USER_INTERFACE='dialog'
 
 # Editor used to modify settings (nano, vim)
 export SETTINGS_EDITOR='vim'
@@ -11,6 +11,7 @@ export MIRRORLIST_COUNTRY='United States'
 export AUR_UPGRADE=true
 
 # Whitelist of AUR packages that should not show up as dropped packages
+# NOTE: AUR packages in the AUR_DIR will automatically be whitelisted
 export AUR_WHITELIST=()
 
 # Directory where currently installed AUR packages are stored

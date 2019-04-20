@@ -62,9 +62,11 @@ aur_setup() {
 	if [[ "$REPLY" =~ [yY] ]]; then
 		printf "Setting up AUR package directory...\n"
 		if [[ ! -d "$AUR_DIR" ]]; then
-			mkdir "$AUR_DIR"
+			mkdir -p "$AUR_DIR"
+			test -n "$SUDO_USER" && chown "$SUDO_USER" "$AUR_DIR"
 		fi
-		chgrp nobody "$AUR_DIR"
+
+		chgrp "$1" "$AUR_DIR"
 		chmod g+ws "$AUR_DIR"
 		setfacl -d --set u::rwx,g::rx,o::rx "$AUR_DIR"
 		setfacl -m u::rwx,g::rwx,o::- "$AUR_DIR"
@@ -74,16 +76,19 @@ aur_setup() {
 
 rebuild_aur() {
 	# Rebuild AUR packages
-	printf "\n"
-	read -r -p "Do you want to rebuild AUR packages? [y/N]"
-	if [[ "$REPLY" =~ [yY] ]]; then
-		if [[ -w "$AUR_DIR" ]] && sudo -u nobody bash -c "[[ -w $AUR_DIR ]]"; then
+	AUR_DIR_GROUP="nobody"
+	test -n "$SUDO_USER" && AUR_DIR_GROUP="$SUDO_USER"
+
+	if [[ -w "$AUR_DIR" ]] && sudo -u "$AUR_DIR_GROUP" test -w "$AUR_DIR"; then
+		printf "\n"
+		read -r -p "Do you want to rebuild the AUR packages in $AUR_DIR? [y/N]"
+		if [[ "$REPLY" =~ [yY] ]]; then
 			printf "Rebuilding AUR packages...\n"
 			if [[ -n "$(ls -A $AUR_DIR)" ]]; then
 				starting_dir="$(pwd)"
 				for aur_pkg in "$AUR_DIR"/*/; do
 					if [[ -d "$aur_pkg" ]]; then
-						if sudo -u nobody bash -c "[[ ! -w $aur_pkg ]]"; then
+						if ! sudo -u "$AUR_DIR_GROUP" test -w "$aur_pkg"; then
 							chmod -R g+w "$aur_pkg"
 						fi
 						cd "$aur_pkg"
@@ -92,8 +97,8 @@ rebuild_aur() {
 						fi
 						source PKGBUILD
 						pacman -S --needed --asdeps "${depends[@]}" "${makedepends[@]}" --noconfirm
-						sudo -u nobody makepkg -fc --noconfirm
-						pacman -U "$(sudo -u nobody makepkg --packagelist)" --noconfirm
+						sudo -u "$AUR_DIR_GROUP" makepkg -fc --noconfirm
+						pacman -U "$(sudo -u $AUR_DIR_GROUP makepkg --packagelist)" --noconfirm
 					fi
 				done
 				cd "$starting_dir"
@@ -101,10 +106,10 @@ rebuild_aur() {
 			else
 				printf "...No AUR packages in $AUR_DIR\n"
 			fi
-		else
-			printf "AUR package directory not set up\n"
-			aur_setup
 		fi
+	else
+		printf "\nAUR package directory not set up"
+		aur_setup "$AUR_DIR_GROUP"
 	fi
 }
 
@@ -200,9 +205,7 @@ clean_broken_symlinks() {
 clean_old_config() {
 	# Remind the user to clean up old configuration files
 	user_home="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
-	if [[ -z "$user_home" ]]; then
-		user_home="~"
-	fi
+	test -z "$user_home" && user_home="~"
 	printf "\nREMINDER: Check the following directories for old configuration files\n"
 	printf "$user_home/\n"
 	printf "$user_home/.config/\n"
@@ -224,17 +227,22 @@ journal_errors() {
 
 execute_backup() {
 	# Execute backup operations
-	read -r -p "Do you want to backup the system to $BACKUP_LOCATION? [y/N]"
-	if [[ "$REPLY" =~ [yY] ]]; then
-		if [[ -d "$BACKUP_LOCATION" ]]; then
-			printf "\nBacking up the system...\n"
-			rsync -aAXHS --info=progress2 --delete \
-			--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} \
-			/ "$BACKUP_LOCATION"
-			touch "$BACKUP_LOCATION/verified_backup_image.lock"
-			printf "...Done backing up to $BACKUP_LOCATION\n"
-		else
-			printf "\n$BACKUP_LOCATION is not an existing directory\n"
+	if [[ -d "$BACKUP_LOCATION" ]]; then
+		read -r -p "Do you want to backup the system to $BACKUP_LOCATION? [y/N]"
+		if [[ "$REPLY" =~ [yY] ]]; then
+				printf "\nBacking up the system...\n"
+				rsync -aAXHS --info=progress2 --delete \
+				--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} \
+				/ "$BACKUP_LOCATION"
+				touch "$BACKUP_LOCATION/verified_backup_image.lock"
+				printf "...Done backing up to $BACKUP_LOCATION\n"
+		fi
+	else
+		printf "\n$BACKUP_LOCATION is not an existing directory\n"
+		read -r -p "Do you want to create backup directory at $BACKUP_LOCATION? [y/N]"
+		if [[ "$REPLY" =~ [yY] ]]; then
+			mkdir -p "$BACKUP_LOCATION"
+			execute_backup
 		fi
 	fi
 }
@@ -256,7 +264,7 @@ execute_restore() {
 }
 
 fallback_editor() {
-	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default" 1>&2
+	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default\n" 1>&2
 	read
 	vim $(pkg_path)/settings.sh
 }
