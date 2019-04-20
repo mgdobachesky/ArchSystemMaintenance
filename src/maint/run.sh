@@ -61,7 +61,7 @@ if [[ "$EUID" -eq 0 ]]; then
 	case "$USER_INTERFACE" in
 		'cli')
 			source $(pkg_path)/ui/cli.sh;;
-		'dialog')
+		'dialog'|'nCurses')
 			source $(pkg_path)/ui/dialog.sh;;
 		*)
 			fallback_ui;;	
