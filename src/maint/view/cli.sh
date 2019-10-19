@@ -1,13 +1,7 @@
 #!/bin/bash
 
-#######################################################################
-####################### Command Line Interface ########################
-#######################################################################
-
 main() {
-	# Continue if script is running as root
 	if [[ "$EUID" -eq 0 ]]; then
-		# Take appropriate action
 		PS3='Action to take: '
 		select opt in "Arch Linux News" "Upgrade System" "Clean Filesystem" "System Error Check" "Backup System" "Restore System" "Update Settings" "Exit"; do
 			case $REPLY in
@@ -24,4 +18,3 @@ main() {
 		done
 	fi
 }
-

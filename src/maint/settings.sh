@@ -6,7 +6,7 @@
 export USER_INTERFACE='dialog'
 
 # Editor used to modify settings (nano, vim)
-export SETTINGS_EDITOR='vim'
+export SETTINGS_EDITOR='nano'
 
 # Country to generate the mirror list for
 export MIRRORLIST_COUNTRY='United States'

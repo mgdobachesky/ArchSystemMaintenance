@@ -1,19 +1,13 @@
 #!/bin/bash
 
-#######################################################################
-######################## Dialog User Interface ########################
-#######################################################################
-
 check_exit() {
 	printf "Done - Press enter to continue\n";
 	read
 }
 
 main () {
-	# Continue if script is running as root
 	if [[ "$EUID" -eq 0 ]]; then
 		while true; do
-			# Take appropriate action
 			REPLY=$(dialog --stdout --title "Arch System Maintenance" --menu "Choose Maintenence Task:" 15 50 8 \
 					1 "Arch Linux News" \
 					2 "Upgrade System" \
