@@ -8,6 +8,26 @@ pkg_path() {
 	fi
 }
 
+check_optdepends() {
+	if [[ -n "$(command -v $1)" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+fallback_view() {
+	printf "\nIncorrect USER_INTERFACE setting -- falling back to default\n" 1>&2
+	read
+	source $(pkg_path)/view/dialog.sh
+}
+
+fallback_editor() {
+	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default\n" 1>&2
+	read
+	nano $(pkg_path)/settings.sh
+}
+
 source_settings() {
 	source $(pkg_path)/settings.sh
 }
@@ -18,7 +38,7 @@ source_service() {
 	source $(pkg_path)/service/cleanup.sh
 	source $(pkg_path)/service/errors.sh
 	source $(pkg_path)/service/backup.sh
-	source $(pkg_path)/service/options.sh
+	source $(pkg_path)/service/settings.sh
 	source $(pkg_path)/service/fallback.sh
 }
 
