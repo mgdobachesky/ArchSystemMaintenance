@@ -39,7 +39,6 @@ source_service() {
 	source $(pkg_path)/service/errors.sh
 	source $(pkg_path)/service/backup.sh
 	source $(pkg_path)/service/settings.sh
-	source $(pkg_path)/service/fallback.sh
 }
 
 source_controller() {
