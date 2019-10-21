@@ -5,8 +5,8 @@
 # User interface of choice (cli, dialog)
 export USER_INTERFACE='dialog'
 
-# Editor used to modify settings (nano, vim, emacs)
-export SETTINGS_EDITOR='nano'
+# Editor used to modify settings (vim, nano, emacs)
+export SETTINGS_EDITOR='vim'
 
 # Country to generate the mirror list for
 export MIRRORLIST_COUNTRY='United States'

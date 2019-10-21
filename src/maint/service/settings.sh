@@ -2,14 +2,14 @@
 
 modify_settings() {
 	case "$SETTINGS_EDITOR" in
-		'nano')
-			nano $(pkg_path)/settings.sh;;
 		'vim')
-			check_optdepends vim
+			vim $(pkg_path)/settings.sh;;
+		'nano')
+			check_optdepends nano
 			if [[ "$?" == 0 ]]; then
-				vim $(pkg_path)/settings.sh
+				nano $(pkg_path)/settings.sh
 			else
-				printf "\nvim is not installed"
+				printf "\nnano is not installed"
 				fallback_editor
 			fi;;
 		'emacs')

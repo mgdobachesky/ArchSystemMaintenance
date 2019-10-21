@@ -25,7 +25,7 @@ fallback_view() {
 fallback_editor() {
 	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default\n" 1>&2
 	read
-	nano $(pkg_path)/settings.sh
+	vim $(pkg_path)/settings.sh
 }
 
 source_settings() {
