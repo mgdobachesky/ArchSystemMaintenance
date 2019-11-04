@@ -22,10 +22,11 @@ fallback_view() {
 	source $(pkg_path)/view/dialog.sh
 }
 
-fallback_editor() {
-	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default\n" 1>&2
-	read
-	vim $(pkg_path)/settings.sh
+repair_settings() {
+	read -r -p "Would you like to repair settings? [y/N]"
+	if [[ "$REPLY" =~ [yY] ]]; then
+		update_settings
+	fi
 }
 
 source_settings() {
@@ -47,10 +48,7 @@ source_controller() {
 
 execute_main() {
 	main
-	
-	if [[ "$?" == 1 ]]; then
-		repair_settings
-	fi
+	test "$?" == 1 && repair_settings
 }
 
 if [[ "$EUID" -ne 0 ]]; then

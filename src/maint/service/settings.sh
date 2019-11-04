@@ -20,9 +20,8 @@ execute_editor() {
 	fi
 }
 
-repair_settings() {
-	read -r -p "Would you like to repair settings? [y/N]"
-	if [[ "$REPLY" =~ [yY] ]]; then
-		update_settings
-	fi
+fallback_editor() {
+	printf "\nIncorrect SETTINGS_EDITOR setting -- falling back to default\n" 1>&2
+	read
+	vim $(pkg_path)/settings.sh
 }
