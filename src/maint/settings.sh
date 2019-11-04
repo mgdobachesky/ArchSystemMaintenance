@@ -6,7 +6,7 @@
 export USER_INTERFACE='dialog'
 
 # Editor used to modify settings (vim, nano, emacs)
-# NOTE: EDITOR environment variable takes precedence when set for root
+# NOTE: EDITOR environment variable takes precedence
 export SETTINGS_EDITOR='vim'
 
 # Country to generate the mirror list for

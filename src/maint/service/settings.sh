@@ -1,6 +1,10 @@
 #!/bin/bash
 
 modify_settings() {
+	if [[ -z "$EDITOR" && -n "$SUDO_USER" ]]; then
+		EDITOR="$(sudo -i -u $SUDO_USER env |  awk '/^EDITOR=/{ print substr($0, 8) }')"
+	fi
+
 	if [[ -n "$EDITOR" ]]; then
 		execute_editor "$EDITOR" "\nEDITOR environment variable of $EDITOR is not valid"
 	elif [[ "$SETTINGS_EDITOR" =~ (vim|nano|emacs) ]]; then
