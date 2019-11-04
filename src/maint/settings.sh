@@ -6,6 +6,7 @@
 export USER_INTERFACE='dialog'
 
 # Editor used to modify settings (vim, nano, emacs)
+# NOTE: EDITOR environment variable takes precedence when set for root
 export SETTINGS_EDITOR='vim'
 
 # Country to generate the mirror list for
@@ -33,6 +34,9 @@ export AUR_WHITELIST=()
 
 # Where to store the system backup
 export BACKUP_LOCATION="/usr/local/backup"
+
+# Directories to exclude from backup/restore process
+export BACKUP_EXCLUDE=("/dev/*" "/proc/*" "/sys/*" "/tmp/*" "/run/*" "/mnt/*" "/media/*")
 
 
 #######################################################################

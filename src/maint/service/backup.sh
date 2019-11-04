@@ -6,7 +6,8 @@ execute_backup() {
 		if [[ "$REPLY" =~ [yY] ]]; then
 				printf "\nBacking up the system...\n"
 				rsync -aAXHS --info=progress2 --delete \
-				--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","$BACKUP_LOCATION"} \
+				--exclude-from <(printf '%s\n' "${BACKUP_EXCLUDE[@]}") \
+				--exclude={"/swapfile","/lost+found","$BACKUP_LOCATION"} \
 				/ "$BACKUP_LOCATION"
 				touch "$BACKUP_LOCATION/verified_backup_image.lock"
 				printf "...Done backing up to $BACKUP_LOCATION\n"
@@ -27,7 +28,8 @@ execute_restore() {
 		if [[ -a "$BACKUP_LOCATION/verified_backup_image.lock" ]]; then
 			printf "\nRestoring the system...\n"
 			rsync -aAXHS --info=progress2 --delete \
-			--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/swapfile","/lost+found","/verified_backup_image.lock","$BACKUP_LOCATION"} \
+			--exclude-from <(printf '%s\n' "${BACKUP_EXCLUDE[@]}") \
+			--exclude={"/swapfile","/lost+found","/verified_backup_image.lock","$BACKUP_LOCATION"} \
 			"$BACKUP_LOCATION/" /
 			printf "...Done restoring from $BACKUP_LOCATION\n"
 		else

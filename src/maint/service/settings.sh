@@ -1,28 +1,23 @@
 #!/bin/bash
 
 modify_settings() {
-	case "$SETTINGS_EDITOR" in
-		'vim')
-			vim $(pkg_path)/settings.sh;;
-		'nano')
-			check_optdepends nano
-			if [[ "$?" == 0 ]]; then
-				nano $(pkg_path)/settings.sh
-			else
-				printf "\nnano is not installed"
-				fallback_editor
-			fi;;
-		'emacs')
-			check_optdepends emacs
-			if [[ "$?" == 0 ]]; then
-				emacs $(pkg_path)/settings.sh
-			else
-				printf "\nemacs is not installed"
-				fallback_editor
-			fi;;
-		*)
-			fallback_editor;;
-	esac
+	if [[ -n "$EDITOR" ]]; then
+		execute_editor "$EDITOR" "\nEDITOR environment variable of $EDITOR is not valid"
+	elif [[ "$SETTINGS_EDITOR" =~ (vim|nano|emacs) ]]; then
+		execute_editor "$SETTINGS_EDITOR"
+	else
+		fallback_editor
+	fi
+}
+
+execute_editor() {
+	check_optdepends "$1"
+	if [[ "$?" == 0 ]]; then
+		$1 $(pkg_path)/settings.sh
+	else
+		printf "${2:-\n$1 is not installed}"
+		fallback_editor
+	fi
 }
 
 repair_settings() {
